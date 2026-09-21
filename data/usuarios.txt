@@ -1,0 +1,3 @@
+1,ADMIN,admin,1234,00000000,Administrador inicial,Casa central,admin@sixt.com.ar,1100000000
+2,VENDEDOR,Pepe,12345,30111222,Pepe Vendedor,Callao 100,pepe@sixt.com.ar,1133445566
+3,CLIENTE,Ema,1234,38258469,Morano,Virrey Liniers 21,ema@gmail.com,1133168094
