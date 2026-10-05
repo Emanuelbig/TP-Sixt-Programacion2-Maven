@@ -1,9 +1,21 @@
 package ar.edu.utn.inspt.sixt.modelos;
 
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "usuarios")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_usuario")
 public abstract class Usuario {
 
     // private, no protected: las hijas ya no necesitan tocarlos directo,
     // porque los metodos que los usan ahora viven aca.
+    @Id
     private int id;
     private String username;
     private String password;
@@ -12,6 +24,9 @@ public abstract class Usuario {
     private String direccion;
     private String email;
     private String telefono;
+
+    protected Usuario() {
+    }
 
     //constructor
     public Usuario(int id, String username, String password, String dni,

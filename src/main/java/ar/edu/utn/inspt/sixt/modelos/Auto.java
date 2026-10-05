@@ -1,6 +1,14 @@
 package ar.edu.utn.inspt.sixt.modelos;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("AUTO")
 public class Auto extends Vehiculo {
+
+    protected Auto() {
+    }
 
     public Auto(int id, String patente, String marca, String modelo, String color, double precioBaseDiario, Oficina oficinaActual) {
         super(id, patente, marca, modelo, color, precioBaseDiario, oficinaActual);

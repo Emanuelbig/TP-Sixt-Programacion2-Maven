@@ -1,6 +1,14 @@
 package ar.edu.utn.inspt.sixt.modelos;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("VENDEDOR")
 public class Vendedor extends Usuario {
+
+    protected Vendedor() {
+    }
 
     public Vendedor(int id, String username, String password, String dni,
             String nombre, String direccion, String email, String telefono) {

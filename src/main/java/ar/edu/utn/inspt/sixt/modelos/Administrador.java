@@ -1,6 +1,14 @@
 package ar.edu.utn.inspt.sixt.modelos;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("ADMIN")
 public class Administrador extends Usuario {
+
+    protected Administrador() {
+    }
 
     public Administrador(int id, String username, String password, String dni,
             String nombre, String direccion, String email, String telefono) {

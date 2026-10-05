@@ -15,6 +15,7 @@
     <description>TP Programacion 2 - Gestion de reservas de autos - Grupo H</description>
     <properties>
         <java.version>21</java.version>
+        <lombok.version>1.18.46</lombok.version>
         <start-class>ar.edu.utn.inspt.sixt.SixtApplication</start-class>
     </properties>
     <dependencies>
@@ -25,6 +26,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,6 +62,25 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <excludes>
+                        <exclude>**/dao/**</exclude> // TODO: quitar estos excludes cuando se saquen los txt
+                        <exclude>**/menu/**</exclude>
+                        <exclude>**/modelos/**</exclude>
+                        <exclude>**/servicios/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

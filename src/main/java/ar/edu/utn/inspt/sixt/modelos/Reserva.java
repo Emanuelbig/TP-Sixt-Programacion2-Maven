@@ -1,20 +1,44 @@
 package ar.edu.utn.inspt.sixt.modelos;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
+@Table(name = "reservas")
 public class Reserva {
 
+    @Id
     private int idReserva;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id")
     private Cliente clienteTitular;
+    @ManyToMany
+    @JoinTable(name = "reserva_vehiculos",
+            joinColumns = @JoinColumn(name = "reserva_id"),
+            inverseJoinColumns = @JoinColumn(name = "vehiculo_id"))
     private List<Vehiculo> vehiculosAlquilados;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "oficina_origen_id")
     private Oficina oficinaOrigen;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "oficina_destino_id")
     private Oficina oficinaDestino;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private double litrosGasolinaInicial;
     private double precioTotal;
     private boolean entregado;
+
+    protected Reserva() {
+    }
 
     public Reserva(int idReserva, Cliente clienteTitular, List<Vehiculo> vehiculosAlquilados, Oficina oficinaOrigen, Oficina oficinaDestino, LocalDate fechaInicio, LocalDate fechaFin, double litrosGasolinaInicial, double precioTotal, boolean entregado) {
         this.idReserva = idReserva;
