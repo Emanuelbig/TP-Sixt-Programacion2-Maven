@@ -30,16 +30,16 @@ public class Booking {
     private String colour;
     @Column(name = "vehicle_year")
     private int year;
-    private Instant created_at;
-    private int gas_liters;
-    private int total_price;
-    private Boolean is_returned;
+    private Instant createdAt;
+    private int gasLiters;
+    private int totalPrice;
+    private Boolean isReturned;
 
     @Column(name = "date_from", nullable = false)
-    private LocalDate date_from;
+    private LocalDate dateFrom;
 
     @Column(name = "date_to", nullable = false)
-    private LocalDate date_to;
+    private LocalDate dateTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
@@ -55,9 +55,9 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_office_id", nullable = false)
-    private Office origin_office;
+    private Office originOffice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_office_id", nullable = false)
-    private Office destination_office;
+    private Office destinationOffice;
 }

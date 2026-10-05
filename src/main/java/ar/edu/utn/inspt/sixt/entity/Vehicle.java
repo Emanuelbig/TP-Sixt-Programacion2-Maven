@@ -29,8 +29,8 @@ public class Vehicle {
     private String colour;
     @Column(name = "vehicle_year")
     private int year;
-    private Instant created_at;
-    private Instant deleted_at;
+    private Instant createdAt;
+    private Instant deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "model_id", nullable = false)

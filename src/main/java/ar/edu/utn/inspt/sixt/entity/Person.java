@@ -28,8 +28,8 @@ public class Person {
     private String name;
     private String email;
     private int phone;
-    private Instant created_at;
-    private Instant deleted_at;
+    private Instant createdAt;
+    private Instant deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
