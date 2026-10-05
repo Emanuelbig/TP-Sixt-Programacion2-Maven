@@ -1,10 +1,20 @@
 package ar.edu.utn.inspt.sixt.modelos;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "oficinas")
 public class Oficina {
 
+    @Id
     private int idOficina;
     private String nombre;
     private String direccion;
+
+    protected Oficina() {
+    }
 
     public Oficina(int idOficina, String nombre, String direccion) {
         this.idOficina = idOficina;
