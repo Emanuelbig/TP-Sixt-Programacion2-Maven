@@ -13,24 +13,24 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="b" items="${reservas}">
+                        <c:forEach var="reserva" items="${reservas}">
                             <tr>
-                                <td>${b.id}</td>
-                                <td class="fw-semibold">${b.client.name}</td>
-                                <td>${b.salesman.name}</td>
-                                <td>${b.plate}</td>
-                                <td>${b.dateFrom}</td>
-                                <td>${b.dateTo}</td>
-                                <td class="text-muted">${b.originOffice.zone} → ${b.destinationOffice.zone}</td>
-                                <td class="text-end">$ <fmt:formatNumber value="${b.totalPrice}" maxFractionDigits="0"/></td>
+                                <td>${reserva.id}</td>
+                                <td class="fw-semibold">${reserva.cliente.nombre}</td>
+                                <td>${reserva.vendedor.nombre}</td>
+                                <td>${reserva.patente}</td>
+                                <td>${reserva.fechaDesde}</td>
+                                <td>${reserva.fechaHasta}</td>
+                                <td class="text-muted">${reserva.oficinaOrigen.zona} → ${reserva.oficinaDestino.zona}</td>
+                                <td class="text-end">$ <fmt:formatNumber value="${reserva.precioTotal}" maxFractionDigits="2"/></td>
                                 <td class="text-center">
                                     <c:choose>
-                                        <c:when test="${b.isReturned}">
+                                        <c:when test="${reserva.devuelto}">
                                             <span class="badge bg-success">Devuelto</span>
                                         </c:when>
                                         <c:otherwise>
                                             <form action="${ctx}/reservas/devolver" method="POST" class="d-inline">
-                                                <input type="hidden" name="id" value="${b.id}">
+                                                <input type="hidden" name="id" value="${reserva.id}">
                                                 <button class="btn btn-sm btn-outline-warning">Marcar devuelto</button>
                                             </form>
                                         </c:otherwise>
@@ -52,51 +52,51 @@
                 <form action="${ctx}/reservas" method="POST" class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label">Cliente</label>
-                        <select name="clientId" class="form-select">
-                            <c:forEach var="p" items="${personas}">
-                                <c:if test="${p.role.name == 'CLIENTE'}"><option value="${p.id}">${p.name}</option></c:if>
+                        <select name="clienteId" class="form-select">
+                            <c:forEach var="persona" items="${personas}">
+                                <c:if test="${persona.rol.permisos.contains('ALQUILAR')}"><option value="${persona.id}">${persona.nombre}</option></c:if>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Vendedor</label>
-                        <select name="salesmanId" class="form-select">
-                            <c:forEach var="p" items="${personas}">
-                                <c:if test="${p.role.name != 'CLIENTE'}"><option value="${p.id}">${p.name}</option></c:if>
+                        <select name="vendedorId" class="form-select">
+                            <c:forEach var="persona" items="${personas}">
+                                <c:if test="${persona.rol.permisos.contains('VENDER')}"><option value="${persona.id}" ${persona.id == usuario.id ? 'selected' : ''}>${persona.nombre}</option></c:if>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Vehículo</label>
-                        <select name="vehicleId" class="form-select">
-                            <c:forEach var="v" items="${vehiculos}">
-                                <option value="${v.id}">${v.plate} - ${v.model.brand} ${v.model.name} ($ <fmt:formatNumber value="${v.model.type.price}" maxFractionDigits="0"/>/día)</option>
+                        <select name="vehiculoId" class="form-select">
+                            <c:forEach var="vehiculo" items="${vehiculos}">
+                                <option value="${vehiculo.id}">${vehiculo.patente} - ${vehiculo.modelo.marca} ${vehiculo.modelo.nombre} ($ <fmt:formatNumber value="${vehiculo.modelo.tipo.precio}" maxFractionDigits="2"/>/día)</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Oficina origen</label>
-                        <select name="originOfficeId" class="form-select">
-                            <c:forEach var="o" items="${oficinas}"><option value="${o.id}">${o.zone}</option></c:forEach>
+                        <select name="oficinaOrigenId" class="form-select">
+                            <c:forEach var="oficina" items="${oficinas}"><option value="${oficina.id}">${oficina.zona}</option></c:forEach>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Oficina destino</label>
-                        <select name="destinationOfficeId" class="form-select">
-                            <c:forEach var="o" items="${oficinas}"><option value="${o.id}">${o.zone}</option></c:forEach>
+                        <select name="oficinaDestinoId" class="form-select">
+                            <c:forEach var="oficina" items="${oficinas}"><option value="${oficina.id}">${oficina.zona}</option></c:forEach>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Desde</label>
-                        <input name="dateFrom" type="date" class="form-control" required>
+                        <input name="fechaDesde" type="date" class="form-control" required>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Hasta</label>
-                        <input name="dateTo" type="date" class="form-control" required>
+                        <input name="fechaHasta" type="date" class="form-control" required>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Litros nafta</label>
-                        <input name="gasLiters" type="number" min="0" class="form-control" required>
+                        <input name="litrosNafta" type="number" min="0" class="form-control" required>
                     </div>
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Crear reserva</button>

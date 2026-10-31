@@ -2,7 +2,10 @@
 <%@taglib prefix="c"  uri="jakarta.tags.core" %>
 <%@taglib prefix="fn"  uri="jakarta.tags.functions" %>
 <%@taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%-- Formato argentino para precios ($ 30.000,50), sin depender del idioma del navegador --%>
+<fmt:setLocale value="es_AR" />
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="usuario" value="${sessionScope.usuario}" />
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,17 +16,27 @@
 </head>
 <body class="bg-light">
 
-    <!-- Barra de navegación superior -->
+    <!-- Barra de navegación: cada uno ve solo las pantallas que su rol le permite -->
     <nav class="navbar navbar-expand navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="${ctx}/home">🚗 Sixt</a>
+            <a class="navbar-brand" href="${ctx}/inicio">🚗 Sixt</a>
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="${ctx}/oficinas">Oficinas</a></li>
-                <li class="nav-item"><a class="nav-link" href="${ctx}/vehiculos">Vehículos</a></li>
-                <li class="nav-item"><a class="nav-link" href="${ctx}/personas">Personas</a></li>
-                <li class="nav-item"><a class="nav-link" href="${ctx}/reservas">Reservas</a></li>
+                <c:if test="${usuario.permisos.contains('ADMINISTRAR')}">
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/oficinas">Oficinas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/vehiculos">Vehículos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/personas">Personas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/roles">Roles</a></li>
+                </c:if>
+                <c:if test="${usuario.permisos.contains('VENDER')}">
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/reservas">Reservas</a></li>
+                </c:if>
+                <c:if test="${usuario.permisos.contains('ALQUILAR')}">
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/mis-reservas">Mis reservas</a></li>
+                </c:if>
             </ul>
-            <span class="navbar-text me-3">${sessionScope.usuario}</span>
+            <a href="${ctx}/mi-cuenta" class="navbar-text me-3 text-decoration-none">
+                ${usuario.nombre} <span class="badge bg-secondary">${usuario.rol}</span>
+            </a>
             <a href="${ctx}/logout" class="btn btn-outline-light btn-sm">Salir</a>
         </div>
     </nav>
@@ -32,4 +45,7 @@
 
         <c:if test="${not empty error}">
             <div class="alert alert-danger">${error}</div>
+        </c:if>
+        <c:if test="${not empty mensaje}">
+            <div class="alert alert-success">${mensaje}</div>
         </c:if>

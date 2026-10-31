@@ -27,12 +27,12 @@
                     <div class="card-body">
                         <form action="${pageContext.request.contextPath}/login" method="POST">
                             <div class="mb-3">
-                                <label for="username" class="form-label fw-semibold">Usuario</label>
-                                <input id="username" name="username" class="form-control" placeholder="admin" required>
+                                <label for="email" class="form-label fw-semibold">Email</label>
+                                <input id="email" name="email" type="email" class="form-control" placeholder="admin@sixt.com.ar" required>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label fw-semibold">Contraseña</label>
-                                <input id="password" name="password" type="password" class="form-control" placeholder="1234" required>
+                                <label for="contrasenia" class="form-label fw-semibold">Contraseña</label>
+                                <input id="contrasenia" name="contrasenia" type="password" class="form-control" placeholder="••••••" required>
                             </div>
 
                             <c:if test="${not empty error}">

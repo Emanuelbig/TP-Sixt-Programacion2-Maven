@@ -1,7 +1,7 @@
 package ar.edu.utn.inspt.sixt;
 
-import ar.edu.utn.inspt.sixt.entity.ModelType;
-import ar.edu.utn.inspt.sixt.repository.ModelTypeRepository;
+import ar.edu.utn.inspt.sixt.modelo.TipoModelo;
+import ar.edu.utn.inspt.sixt.repositorio.TipoModeloRepositorio;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,36 +23,36 @@ class SixtApplicationTests {
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	private ModelTypeRepository modelTypeRepository;
+	private TipoModeloRepositorio tipoModeloRepositorio;
 
 	@Test
 	void contextLoads() {
 	}
 
 	@Test
-	void hibernateCreatesDomainTables() {
-		Integer tableCount = jdbcTemplate.queryForObject(
+	void hibernateCreaLasTablas() {
+		Integer cantidadTablas = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
 						+ "WHERE TABLE_SCHEMA = 'PUBLIC' "
-						+ "AND TABLE_NAME IN ('BOOKING', 'MODEL', 'MODEL_TYPE', 'OFFICE', 'PERSON', 'ROLES', 'VEHICLE')",
+						+ "AND TABLE_NAME IN ('RESERVA', 'MODELO', 'TIPO_MODELO', 'OFICINA', 'PERSONA', 'ROL', 'VEHICULO')",
 				Integer.class);
 
-		assertThat(tableCount).isEqualTo(7);
+		assertThat(cantidadTablas).isEqualTo(7);
 	}
 
 	@Test
-	void modelTypeCanBeStoredAndRead() {
-		ModelType modelType = new ModelType();
-		modelType.setName("Sedan");
-		modelType.setPrice(new BigDecimal("50.00"));
+	void tipoModeloSePuedeGuardarYLeer() {
+		TipoModelo tipoModelo = new TipoModelo();
+		tipoModelo.setNombre("Sedan");
+		tipoModelo.setPrecio(new BigDecimal("50.00"));
 
-		ModelType saved = modelTypeRepository.save(modelType);
+		TipoModelo guardado = tipoModeloRepositorio.save(tipoModelo);
 
-		assertThat(saved.getId()).isNotNull();
-		assertThat(modelTypeRepository.findById(saved.getId()))
+		assertThat(guardado.getId()).isNotNull();
+		assertThat(tipoModeloRepositorio.findById(guardado.getId()))
 				.isPresent()
 				.get()
-				.extracting(ModelType::getName)
+				.extracting(TipoModelo::getNombre)
 				.isEqualTo("Sedan");
 	}
 

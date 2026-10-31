@@ -9,7 +9,11 @@
         </session-timeout>
     </session-config>
 
-    <!-- Si el backend no responde, mostramos una pagina amigable -->
+    <!-- Paginas de error amigables: sin permiso (403) o backend que no responde -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/jsp/error.jsp</location>
+    </error-page>
     <error-page>
         <exception-type>jakarta.servlet.ServletException</exception-type>
         <location>/WEB-INF/jsp/error.jsp</location>
