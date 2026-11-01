@@ -8,7 +8,7 @@
         <version>4.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ar.edu.utn.inspt</groupId>
+    <groupId>com</groupId>
     <artifactId>sixt</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Sixt</name>
@@ -16,7 +16,7 @@
     <properties>
         <java.version>21</java.version>
         <lombok.version>1.18.46</lombok.version>
-        <start-class>ar.edu.utn.inspt.sixt.SixtApplication</start-class>
+        <start-class>com.sixt.SixtApplication</start-class>
     </properties>
     <dependencies>
         <dependency>
