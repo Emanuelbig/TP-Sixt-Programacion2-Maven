@@ -111,6 +111,7 @@ a { color: inherit; }
     text-decoration: none;
     background: var(--sx-naranja);
     color: #fff;
+    white-space: nowrap;   /* agregado: un boton nunca parte su texto en varias lineas */
 }
 .sx-btn:hover { filter: brightness(0.92); }
 .sx-btn-oscuro { background: var(--sx-negro); color: #fff; }
@@ -270,6 +271,7 @@ a { color: inherit; }
     color: var(--sx-negro);
     font-size: 12px;
     font-weight: 700;
+    white-space: nowrap;
 }
 .sx-header .sx-etiqueta { background: #333; color: #fff; }
 
@@ -303,6 +305,9 @@ a { color: inherit; }
     gap: 24px;
     align-items: start;
 }
+/* Tablas anchas (Personas, Clientes): siempre tabla arriba y formulario abajo */
+.sx-dos-columnas.sx-apilado { grid-template-columns: 1fr; }
+.sx-dos-columnas.sx-apilado > .sx-panel { max-width: 560px; }
 .sx-mitades {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -339,7 +344,9 @@ a { color: inherit; }
 .sx-sin-corte { white-space: nowrap; }
 
 /* Acciones de cada fila: chicas y sin naranja (el naranja es para la accion principal) */
-.sx-acciones { display: flex; gap: 8px; }
+.sx-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+/* En las filas de una tabla los botones van siempre en una linea: si falta lugar, la tabla scrollea */
+.sx-tabla .sx-acciones { flex-wrap: nowrap; }
 .sx-acciones form { margin: 0; }
 .sx-btn-borde {
     background: #fff;
@@ -380,8 +387,9 @@ a.sx-stat:hover { border-color: var(--sx-negro); }
 /* Tablas del sistema un poco mas compactas que las de la skill */
 .sx-tabla th, .sx-tabla td { padding: 10px 12px; font-size: 14px; }
 
-/* Si no entran tabla y formulario lado a lado, el formulario baja */
-@media (max-width: 1200px) {
+/* Si no entran tabla y formulario lado a lado, el formulario baja.
+   1360px: con menos ancho, las tablas de 7 u 8 columnas (Personas, Clientes) no entran al lado del formulario */
+@media (max-width: 1360px) {
     .sx-dos-columnas { grid-template-columns: 1fr; }
     .sx-dos-columnas > .sx-panel { max-width: 560px; }
 }

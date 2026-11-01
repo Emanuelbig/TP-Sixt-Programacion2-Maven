@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Icono de la pestania: cuadrado negro como el header, "S" blanca y la linea naranja de la accion principal -->
+  <rect width="64" height="64" rx="12" fill="#1A1A1A"/>
+  <text x="32" y="45" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="40" fill="#FFFFFF">S</text>
+  <rect x="14" y="52" width="36" height="5" rx="2.5" fill="#FF5000"/>
+</svg>

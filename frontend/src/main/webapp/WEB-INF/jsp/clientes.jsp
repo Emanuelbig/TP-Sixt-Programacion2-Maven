@@ -2,7 +2,7 @@
 
         <h1 class="sx-h2">Clientes</h1>
 
-        <div class="sx-dos-columnas">
+        <div class="sx-dos-columnas sx-apilado">
             <div class="sx-tabla-caja">
                 <table class="sx-tabla">
                     <thead>

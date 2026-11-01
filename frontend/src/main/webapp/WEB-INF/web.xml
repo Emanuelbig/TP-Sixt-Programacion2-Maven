@@ -23,6 +23,15 @@
         <error-code>403</error-code>
         <location>/WEB-INF/jsp/error.jsp</location>
     </error-page>
+    <!-- Direccion inexistente o falla inesperada: tambien con la pagina propia, no la de Tomcat -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/jsp/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/jsp/error.jsp</location>
+    </error-page>
     <error-page>
         <exception-type>jakarta.servlet.ServletException</exception-type>
         <location>/WEB-INF/jsp/error.jsp</location>

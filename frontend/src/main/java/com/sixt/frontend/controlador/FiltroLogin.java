@@ -45,8 +45,8 @@ public class FiltroLogin extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         String ruta = request.getServletPath();
-        // El login y los estilos se ven sin sesion (si no, la pantalla de login quedaria sin CSS)
-        if (ruta.equals("/login") || ruta.startsWith("/css/")) {
+        // El login, los estilos y el icono se ven sin sesion (si no, la pantalla de login quedaria sin CSS)
+        if (ruta.equals("/login") || ruta.startsWith("/css/") || ruta.equals("/favicon.svg")) {
             chain.doFilter(request, response);
             return;
         }
