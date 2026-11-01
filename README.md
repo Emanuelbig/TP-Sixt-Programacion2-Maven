@@ -72,7 +72,8 @@ Cada rol ve solo las pantallas de sus permisos (`FiltroLogin` devuelve 403 si no
 - **Roles** (`ADMINISTRAR`): cada rol tiene permisos (`ADMINISTRAR`, `VENDER`,
   `ALQUILAR`). Se pueden crear roles nuevos desde la pantalla.
 - **Reservas** (`VENDER`): crear reservas y marcarlas como devueltas.
-  - El precio se calcula solo: precio diario del tipo de vehículo × cantidad de días.
+  - Cada reserva incluye uno o mas vehiculos, con combustible y precio historico por detalle.
+  - El total es la suma de los alquileres de todos sus vehiculos.
   - No se puede reservar un auto ocupado en esas fechas.
   - Al devolver, el vehículo queda en la oficina de destino.
 - **Mis reservas** (`ALQUILAR`): las reservas del cliente que inició sesión.
@@ -137,3 +138,42 @@ En Java los campos van en **camelCase** (`fechaCreacion`) y en la base quedan en
 ## Pendientes
 
 - La API del backend no pide autenticación: confía en el frontend, que controla los permisos por pantalla. Para exponerla a otros clientes habría que agregar tokens (JWT).
+
+## Reservas con varios vehiculos
+
+`Reserva` contiene uno o mas `DetalleReserva` mediante `@OneToMany`.
+Cada detalle referencia un vehiculo, conserva patente/color/anio, litros iniciales
+ y precio del alquiler completo para ese vehiculo. El total suma esos precios.
+Fechas, cliente, vendedor y oficinas son comunes. La devolucion es conjunta.
+Los detalles se crean y persisten dentro de la transaccion de la reserva;
+no tienen endpoints independientes que permitan dejar una reserva sin detalles.
+
+`POST /api/reservas` recibe ahora este formato (los campos individuales
+`vehiculoId` y `litrosNafta` se reemplazan por `detalles`):
+
+```json
+{
+  "clienteId": 3,
+  "vendedorId": 2,
+  "oficinaOrigenId": 1,
+  "oficinaDestinoId": 2,
+  "fechaDesde": "2027-01-10",
+  "fechaHasta": "2027-01-12",
+  "detalles": [
+    {"vehiculoId": 1, "litrosNafta": 20},
+    {"vehiculoId": 2, "litrosNafta": 35}
+  ]
+}
+```
+
+### Base de datos existente
+
+Una base nueva obtiene las tablas con Hibernate. Si ya existe la tabla `reserva`
+del modelo anterior, ejecutar **antes de iniciar el backend actualizado** el archivo
+[docs/migracion-detalle-reserva.sql](docs/migracion-detalle-reserva.sql) sobre `sixt`,
+por ejemplo desde la pestaña SQL de phpMyAdmin, con el backend detenido.
+El script conserva reservas y precios historicos, y deja las columnas anteriores
+como respaldo nullable. Puede repetirse sin duplicar los detalles migrados.
+`ddl-auto=update` por si solo no mueve los datos existentes.
+
+Luego reconstruir con `docker compose up -d --build`.

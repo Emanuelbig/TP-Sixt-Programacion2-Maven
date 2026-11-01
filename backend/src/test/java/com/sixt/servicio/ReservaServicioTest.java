@@ -8,6 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sixt.dto.NuevaReserva;
+import com.sixt.dto.NuevoDetalleReserva;
+import com.sixt.modelo.DetalleReserva;
+import java.util.List;
 import com.sixt.excepcion.ConflictoExcepcion;
 import com.sixt.excepcion.DatosInvalidosExcepcion;
 import com.sixt.excepcion.RecursoNoEncontradoExcepcion;
@@ -61,7 +64,7 @@ class ReservaServicioTest {
 
         assertThat(reserva.getPrecioTotal()).isEqualByComparingTo("30000");
         assertThat(reserva.getDevuelto()).isFalse();
-        assertThat(reserva.getPatente()).isEqualTo("APG023");
+        assertThat(reserva.getDetalles().getFirst().getPatente()).isEqualTo("APG023");
         assertThat(reserva.getCliente()).isSameAs(cliente);
     }
 
@@ -89,6 +92,7 @@ class ReservaServicioTest {
     @Test
     void rechazaUnClienteSinPermisoDeAlquilar() {
         when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
+        when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(BigDecimal.TEN);
         when(personaServicio.buscarActiva(2L)).thenReturn(vendedor);
 
         // Pepe (VENDEDOR) como cliente
@@ -100,6 +104,7 @@ class ReservaServicioTest {
     @Test
     void rechazaUnVendedorSinPermisoDeVender() {
         when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
+        when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(BigDecimal.TEN);
         when(personaServicio.buscarActiva(3L)).thenReturn(cliente);
 
         // Ema (CLIENTE) como vendedora
@@ -112,7 +117,13 @@ class ReservaServicioTest {
     void alDevolverElVehiculoQuedaEnLaOficinaDeDestino() {
         Oficina destino = new Oficina();
         Reserva reserva = new Reserva();
-        reserva.setVehiculo(auto);
+        DetalleReserva detalle = new DetalleReserva();
+        detalle.setVehiculo(auto);
+        reserva.agregarDetalle(detalle);
+        Vehiculo segundo = vehiculo(2L, "AE123CD");
+        DetalleReserva otro = new DetalleReserva();
+        otro.setVehiculo(segundo);
+        reserva.agregarDetalle(otro);
         reserva.setOficinaDestino(destino);
         reserva.setDevuelto(false);
         when(reservaRepositorio.findById(5L)).thenReturn(Optional.of(reserva));
@@ -122,6 +133,7 @@ class ReservaServicioTest {
 
         assertThat(reserva.getDevuelto()).isTrue();
         assertThat(auto.getOficina()).isSameAs(destino);
+        assertThat(segundo.getOficina()).isSameAs(destino);
     }
 
     @Test
@@ -132,8 +144,67 @@ class ReservaServicioTest {
                 .isInstanceOf(RecursoNoEncontradoExcepcion.class);
     }
 
+    @Test
+    void creaVariosDetallesYSumaSusPrecios() {
+        Vehiculo segundo = vehiculo(2L, "AE123CD");
+        when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
+        when(vehiculoServicio.buscarActivo(2L)).thenReturn(segundo);
+        when(personaServicio.buscarActiva(3L)).thenReturn(cliente);
+        when(personaServicio.buscarActiva(2L)).thenReturn(vendedor);
+        when(oficinaServicio.buscar(any())).thenReturn(new Oficina());
+        when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(new BigDecimal("30000"));
+        when(calculadoraPrecio.calcular(segundo, DESDE, HASTA)).thenReturn(new BigDecimal("54000"));
+        when(reservaRepositorio.save(any())).thenAnswer(i -> i.getArgument(0));
+        Reserva reserva = reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA,
+                List.of(new NuevoDetalleReserva(1L, 20), new NuevoDetalleReserva(2L, 35))));
+        assertThat(reserva.getPrecioTotal()).isEqualByComparingTo("84000");
+        assertThat(reserva.getDetalles()).hasSize(2).allSatisfy(d -> assertThat(d.getReserva()).isSameAs(reserva));
+        assertThat(reserva.getDetalles()).extracting(DetalleReserva::getLitrosNafta).containsExactly(20, 35);
+        assertThat(reserva.getDetalles()).extracting(DetalleReserva::getPrecioAlquiler)
+                .containsExactly(new BigDecimal("30000"), new BigDecimal("54000"));
+    }
+
+    @Test
+    void rechazaReservaSinVehiculos() {
+        assertThatThrownBy(() -> reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA, List.of())))
+                .isInstanceOf(DatosInvalidosExcepcion.class);
+        verify(reservaRepositorio, never()).save(any());
+    }
+
+    @Test
+    void rechazaVehiculosRepetidos() {
+        when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
+        when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(BigDecimal.TEN);
+        assertThatThrownBy(() -> reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA,
+                List.of(new NuevoDetalleReserva(1L, 20), new NuevoDetalleReserva(1L, 30)))))
+                .isInstanceOf(DatosInvalidosExcepcion.class).hasMessageContaining("repetirse");
+        verify(reservaRepositorio, never()).save(any());
+    }
+
+    @Test
+    void noGuardaSiElSegundoVehiculoEstaOcupado() {
+        Vehiculo segundo = vehiculo(2L, "AE123CD");
+        when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
+        when(vehiculoServicio.buscarActivo(2L)).thenReturn(segundo);
+        when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(BigDecimal.TEN);
+        when(reservaRepositorio.vehiculoOcupadoEntre(1L, DESDE, HASTA)).thenReturn(false);
+        when(reservaRepositorio.vehiculoOcupadoEntre(2L, DESDE, HASTA)).thenReturn(true);
+        assertThatThrownBy(() -> reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA,
+                List.of(new NuevoDetalleReserva(1L, 20), new NuevoDetalleReserva(2L, 30)))))
+                .isInstanceOf(ConflictoExcepcion.class);
+        verify(reservaRepositorio, never()).save(any());
+    }
+
+    @Test
+    void rechazaCombustibleNegativo() {
+        assertThatThrownBy(() -> reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA,
+                List.of(new NuevoDetalleReserva(1L, -1)))))
+                .isInstanceOf(DatosInvalidosExcepcion.class);
+    }
+
     private static NuevaReserva pedido(LocalDate desde, LocalDate hasta, Long clienteId, Long vendedorId) {
-        return new NuevaReserva(clienteId, vendedorId, 1L, 1L, 2L, desde, hasta, 20);
+        return new NuevaReserva(clienteId, vendedorId, 1L, 2L, desde, hasta,
+                List.of(new NuevoDetalleReserva(1L, 20)));
     }
 
     private static Vehiculo vehiculo(Long id, String patente) {

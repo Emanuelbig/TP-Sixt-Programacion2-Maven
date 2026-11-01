@@ -11,15 +11,15 @@ public interface ReservaRepositorio extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findByClienteId(Long clienteId);
 
-    boolean existsByVehiculoIdAndDevueltoFalse(Long vehiculoId);
+    boolean existsByDetallesVehiculoIdAndDevueltoFalse(Long vehiculoId);
 
     boolean existsByClienteIdAndDevueltoFalse(Long clienteId);
 
     // Dos rangos de fechas se pisan si cada uno empieza antes de que termine el otro.
     // Las reservas ya devueltas no cuentan: el auto esta libre.
     @Query("""
-            select count(r) > 0 from Reserva r
-            where r.vehiculo.id = :vehiculoId
+            select count(r) > 0 from Reserva r join r.detalles d
+            where d.vehiculo.id = :vehiculoId
               and r.devuelto = false
               and r.fechaDesde <= :fechaHasta
               and r.fechaHasta >= :fechaDesde

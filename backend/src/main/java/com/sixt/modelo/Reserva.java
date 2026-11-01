@@ -2,6 +2,11 @@ package com.sixt.modelo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -30,13 +35,17 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Copia de los datos del vehiculo al momento de reservar
-    private String patente;
-    private String color;
-    private int anio;
-
     private Instant fechaCreacion;
-    private int litrosNafta;
+
+    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    @Setter(lombok.AccessLevel.NONE)
+    private List<DetalleReserva> detalles = new ArrayList<>();
+
+    public void agregarDetalle(DetalleReserva detalle) {
+        detalle.setReserva(this);
+        detalles.add(detalle);
+    }
 
     @Column(precision = 12, scale = 2)
     private BigDecimal precioTotal;
@@ -56,10 +65,6 @@ public class Reserva {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = false)
     private Persona vendedor;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehiculo_id", nullable = false)
-    private Vehiculo vehiculo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "oficina_origen_id", nullable = false)

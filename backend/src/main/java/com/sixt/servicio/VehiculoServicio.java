@@ -73,7 +73,7 @@ public class VehiculoServicio {
     @Transactional
     public void darDeBaja(Long id) {
         Vehiculo vehiculo = buscarActivo(id);
-        if (reservaRepositorio.existsByVehiculoIdAndDevueltoFalse(id)) {
+        if (reservaRepositorio.existsByDetallesVehiculoIdAndDevueltoFalse(id)) {
             throw new ConflictoExcepcion("El vehiculo " + vehiculo.getPatente()
                     + " tiene reservas sin devolver, no se puede dar de baja");
         }

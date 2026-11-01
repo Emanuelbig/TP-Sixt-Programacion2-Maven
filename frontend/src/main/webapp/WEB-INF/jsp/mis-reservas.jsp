@@ -7,7 +7,7 @@
                 <table class="table table-hover table-striped mb-0 align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th><th>Vehículo</th><th>Desde</th><th>Hasta</th>
+                            <th>#</th><th>Vehículos</th><th>Desde</th><th>Hasta</th>
                             <th>Origen → Destino</th><th class="text-end">Total</th><th class="text-center">Estado</th>
                         </tr>
                     </thead>
@@ -15,7 +15,13 @@
                         <c:forEach var="reserva" items="${reservas}">
                             <tr>
                                 <td>${reserva.id}</td>
-                                <td class="fw-semibold">${reserva.patente} <span class="text-muted">(${reserva.color})</span></td>
+                                <td>
+                                    <c:forEach var="detalle" items="${reserva.detalles}">
+                                        <div><c:out value="${detalle.patente}"/> (<c:out value="${detalle.color}"/>)
+                                            - $ <fmt:formatNumber value="${detalle.precioAlquiler}" maxFractionDigits="2"/>
+                                            - <c:out value="${detalle.litrosNafta}"/> L</div>
+                                    </c:forEach>
+                                </td>
                                 <td>${reserva.fechaDesde}</td>
                                 <td>${reserva.fechaHasta}</td>
                                 <td class="text-muted">${reserva.oficinaOrigen.zona} → ${reserva.oficinaDestino.zona}</td>

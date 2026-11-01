@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 @WebServlet(urlPatterns = {"/reservas", "/reservas/devolver"})
 public class ReservasServlet extends PantallaServlet {
@@ -32,10 +35,19 @@ public class ReservasServlet extends PantallaServlet {
         if (request.getServletPath().equals("/reservas/devolver")) {
             respuesta = ClienteBackend.post("/api/reservas/" + request.getParameter("id") + "/devolver", Map.of());
         } else {
-            respuesta = ClienteBackend.post("/api/reservas", Formulario.campos(request,
-                    "clienteId", "vendedorId", "vehiculoId",
-                    "oficinaOrigenId", "oficinaDestinoId",
-                    "fechaDesde", "fechaHasta", "litrosNafta"));
+            Map<String, Object> datos = Formulario.campos(request,
+                    "clienteId", "vendedorId", "oficinaOrigenId", "oficinaDestinoId",
+                    "fechaDesde", "fechaHasta");
+            List<Map<String, Object>> detalles = new ArrayList<>();
+            for (String vehiculoId : Formulario.lista(request, "vehiculoId")) {
+                String litros = request.getParameter("litrosNafta_" + vehiculoId);
+                Map<String, Object> detalle = new LinkedHashMap<>();
+                detalle.put("vehiculoId", vehiculoId);
+                detalle.put("litrosNafta", litros == null || litros.isBlank() ? null : litros.trim());
+                detalles.add(detalle);
+            }
+            datos.put("detalles", detalles);
+            respuesta = ClienteBackend.post("/api/reservas", datos);
         }
         responder(respuesta, "/reservas", request, response);
     }

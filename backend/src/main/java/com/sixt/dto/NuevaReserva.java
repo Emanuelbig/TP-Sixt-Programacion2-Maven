@@ -2,7 +2,9 @@ package com.sixt.dto;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
 import java.time.LocalDate;
 
 public record NuevaReserva(
@@ -11,9 +13,6 @@ public record NuevaReserva(
 
         @NotNull(message = "El vendedor es obligatorio")
         Long vendedorId,
-
-        @NotNull(message = "El vehiculo es obligatorio")
-        Long vehiculoId,
 
         @NotNull(message = "La oficina de origen es obligatoria")
         Long oficinaOrigenId,
@@ -29,7 +28,6 @@ public record NuevaReserva(
         @NotNull(message = "La fecha de fin es obligatoria")
         LocalDate fechaHasta,
 
-        @NotNull(message = "Los litros de nafta son obligatorios")
-        @PositiveOrZero(message = "Los litros de nafta no pueden ser negativos")
-        Integer litrosNafta) {
+        @NotEmpty(message = "La reserva debe incluir al menos un vehiculo")
+        List<@NotNull @Valid NuevoDetalleReserva> detalles) {
 }

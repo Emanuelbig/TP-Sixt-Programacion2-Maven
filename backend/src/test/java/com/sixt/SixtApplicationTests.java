@@ -34,10 +34,10 @@ class SixtApplicationTests {
 		Integer cantidadTablas = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
 						+ "WHERE TABLE_SCHEMA = 'PUBLIC' "
-						+ "AND TABLE_NAME IN ('RESERVA', 'MODELO', 'TIPO_MODELO', 'OFICINA', 'PERSONA', 'ROL', 'VEHICULO')",
+						+ "AND TABLE_NAME IN ('DETALLE_RESERVA', 'RESERVA', 'MODELO', 'TIPO_MODELO', 'OFICINA', 'PERSONA', 'ROL', 'VEHICULO')",
 				Integer.class);
 
-		assertThat(cantidadTablas).isEqualTo(7);
+		assertThat(cantidadTablas).isEqualTo(8);
 	}
 
 	@Test

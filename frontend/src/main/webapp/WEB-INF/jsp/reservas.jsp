@@ -7,7 +7,7 @@
                 <table class="table table-hover table-striped mb-0 align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th><th>Cliente</th><th>Vendedor</th><th>Vehículo</th>
+                            <th>#</th><th>Cliente</th><th>Vendedor</th><th>Vehículos</th>
                             <th>Desde</th><th>Hasta</th><th>Origen → Destino</th>
                             <th class="text-end">Total</th><th class="text-center">Estado</th>
                         </tr>
@@ -18,7 +18,13 @@
                                 <td>${reserva.id}</td>
                                 <td class="fw-semibold">${reserva.cliente.nombre}</td>
                                 <td>${reserva.vendedor.nombre}</td>
-                                <td>${reserva.patente}</td>
+                                <td>
+                                    <c:forEach var="detalle" items="${reserva.detalles}">
+                                        <div><c:out value="${detalle.patente}"/> (<c:out value="${detalle.color}"/>)
+                                            - $ <fmt:formatNumber value="${detalle.precioAlquiler}" maxFractionDigits="2"/>
+                                            - <c:out value="${detalle.litrosNafta}"/> L</div>
+                                    </c:forEach>
+                                </td>
                                 <td>${reserva.fechaDesde}</td>
                                 <td>${reserva.fechaHasta}</td>
                                 <td class="text-muted">${reserva.oficinaOrigen.zona} → ${reserva.oficinaDestino.zona}</td>
@@ -66,14 +72,26 @@
                             </c:forEach>
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Vehículo</label>
-                        <select name="vehiculoId" class="form-select">
-                            <c:forEach var="vehiculo" items="${vehiculos}">
-                                <option value="${vehiculo.id}">${vehiculo.patente} - ${vehiculo.modelo.marca} ${vehiculo.modelo.nombre} ($ <fmt:formatNumber value="${vehiculo.modelo.tipo.precio}" maxFractionDigits="2"/>/día)</option>
-                            </c:forEach>
-                        </select>
-                    </div>
+                    <fieldset class="col-12">
+                        <legend class="fs-6">Vehículos y combustible inicial</legend>
+                        <p class="text-muted">Seleccioná uno o más vehículos e indicá los litros de cada uno.</p>
+                        <c:forEach var="vehiculo" items="${vehiculos}">
+                            <div class="row align-items-center mb-2">
+                                <div class="col-md-8">
+                                    <label><input type="checkbox" name="vehiculoId" value="${vehiculo.id}">
+                                        <c:out value="${vehiculo.patente}"/> - <c:out value="${vehiculo.modelo.marca}"/>
+                                        <c:out value="${vehiculo.modelo.nombre}"/>
+                                        ($ <fmt:formatNumber value="${vehiculo.modelo.tipo.precio}" maxFractionDigits="2"/>/día)
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="nafta-${vehiculo.id}">Litros de nafta</label>
+                                    <input id="nafta-${vehiculo.id}" name="litrosNafta_${vehiculo.id}"
+                                           type="number" min="0" step="1" class="form-control" value="0">
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </fieldset>
                     <div class="col-md-3">
                         <label class="form-label">Oficina origen</label>
                         <select name="oficinaOrigenId" class="form-select">
@@ -93,10 +111,6 @@
                     <div class="col-md-2">
                         <label class="form-label">Hasta</label>
                         <input name="fechaHasta" type="date" class="form-control" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Litros nafta</label>
-                        <input name="litrosNafta" type="number" min="0" class="form-control" required>
                     </div>
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Crear reserva</button>
