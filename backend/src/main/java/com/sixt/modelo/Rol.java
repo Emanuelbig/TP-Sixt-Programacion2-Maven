@@ -18,6 +18,8 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -37,7 +39,8 @@ public class Rol {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "rol_permiso", joinColumns = @JoinColumn(name = "rol_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "permiso")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "permiso", length = 64)
     private Set<Permiso> permisos = EnumSet.noneOf(Permiso.class);
 
     public boolean tiene(Permiso permiso) {

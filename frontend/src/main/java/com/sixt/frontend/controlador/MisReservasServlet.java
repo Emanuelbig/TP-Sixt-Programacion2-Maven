@@ -12,7 +12,7 @@ public class MisReservasServlet extends PantallaServlet {
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
         Object id = UsuarioEnSesion.id(request);
-        request.setAttribute("reservas", ClienteBackend.getLista("/api/reservas?clienteId=" + id));
+        request.setAttribute("reservas", ClienteBackend.getLista(request, "/api/reservas?clienteId=" + id));
     }
 
     @Override

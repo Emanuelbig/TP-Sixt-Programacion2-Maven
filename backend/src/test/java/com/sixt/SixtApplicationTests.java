@@ -107,4 +107,13 @@ class SixtApplicationTests {
         assertThat(validator.validate(valida.datos())).isEmpty();
     }
 
+    @Test
+    void permisosSeGuardanComoTextoSinEnumNativo() {
+        String tipo = jdbcTemplate.queryForObject("""
+                SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'ROL_PERMISO' AND COLUMN_NAME = 'PERMISO'
+                """, String.class);
+        assertThat(tipo).isEqualTo("CHARACTER VARYING");
+    }
+
 }

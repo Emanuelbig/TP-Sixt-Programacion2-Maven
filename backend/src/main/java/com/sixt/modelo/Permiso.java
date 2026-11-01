@@ -7,6 +7,7 @@ package com.sixt.modelo;
 public enum Permiso {
 
     ADMINISTRAR("Gestiona oficinas, vehiculos, personas y roles"),
+    ADMINISTRAR_CLIENTES("Gestiona exclusivamente clientes"),
     ALQUILAR("Puede ser cliente de una reserva"),
     VENDER("Puede registrar reservas como vendedor");
 

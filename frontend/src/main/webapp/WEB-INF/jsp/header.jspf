@@ -27,6 +27,9 @@
                     <li class="nav-item"><a class="nav-link" href="${ctx}/personas">Personas</a></li>
                     <li class="nav-item"><a class="nav-link" href="${ctx}/roles">Roles</a></li>
                 </c:if>
+                <c:if test="${usuario.permisos.contains('ADMINISTRAR_CLIENTES')}">
+                    <li class="nav-item"><a class="nav-link" href="${ctx}/clientes">Clientes</a></li>
+                </c:if>
                 <c:if test="${usuario.permisos.contains('VENDER')}">
                     <li class="nav-item"><a class="nav-link" href="${ctx}/reservas">Reservas</a></li>
                 </c:if>

@@ -27,4 +27,10 @@ public class AutenticacionServicio {
                 .orElseThrow(CredencialesInvalidasExcepcion::new);
         return UsuarioLogueado.de(persona);
     }
+    @Transactional(readOnly = true)
+    public UsuarioLogueado usuarioDeSesion(Long id) {
+        return personaRepositorio.findById(id).filter(Persona::estaActiva)
+                .map(UsuarioLogueado::de).orElseThrow(CredencialesInvalidasExcepcion::new);
+    }
+
 }

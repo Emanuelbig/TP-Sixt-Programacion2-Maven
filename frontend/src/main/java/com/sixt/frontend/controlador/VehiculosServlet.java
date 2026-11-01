@@ -14,10 +14,10 @@ public class VehiculosServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
-        List<Map<String, Object>> vehiculos = ClienteBackend.getLista("/api/vehiculos");
+        List<Map<String, Object>> vehiculos = ClienteBackend.getLista(request, "/api/vehiculos");
         request.setAttribute("vehiculos", vehiculos);
-        request.setAttribute("modelos", ClienteBackend.getLista("/api/modelos"));
-        request.setAttribute("oficinas", ClienteBackend.getLista("/api/oficinas"));
+        request.setAttribute("modelos", ClienteBackend.getLista(request, "/api/modelos"));
+        request.setAttribute("oficinas", ClienteBackend.getLista(request, "/api/oficinas"));
         marcarEdicion(request, vehiculos);
     }
 
@@ -32,13 +32,13 @@ public class VehiculosServlet extends PantallaServlet {
         ClienteBackend.Respuesta respuesta;
 
         if (request.getServletPath().equals("/vehiculos/baja")) {
-            respuesta = ClienteBackend.delete("/api/vehiculos/" + request.getParameter("id"));
+            respuesta = ClienteBackend.delete(request, "/api/vehiculos/" + request.getParameter("id"));
         } else {
             Map<String, Object> datos = Formulario.campos(request,
                     "patente", "color", "anio", "modeloId", "oficinaId");
             respuesta = esEdicion(request)
-                    ? ClienteBackend.put("/api/vehiculos/" + request.getParameter("id"), datos)
-                    : ClienteBackend.post("/api/vehiculos", datos);
+                    ? ClienteBackend.put(request, "/api/vehiculos/" + request.getParameter("id"), datos)
+                    : ClienteBackend.post(request, "/api/vehiculos", datos);
         }
         responder(respuesta, "/vehiculos", request, response);
     }

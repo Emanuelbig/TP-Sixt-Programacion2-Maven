@@ -14,7 +14,7 @@ public class InicioServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("resumen", ClienteBackend.getObjeto("/api/resumen"));
+        request.setAttribute("resumen", ClienteBackend.getObjeto(request, "/api/resumen"));
         request.getRequestDispatcher("/WEB-INF/jsp/inicio.jsp").forward(request, response);
     }
 }

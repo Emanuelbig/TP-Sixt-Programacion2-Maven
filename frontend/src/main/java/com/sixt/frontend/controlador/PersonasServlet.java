@@ -14,9 +14,9 @@ public class PersonasServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
-        List<Map<String, Object>> personas = ClienteBackend.getLista("/api/personas");
+        List<Map<String, Object>> personas = ClienteBackend.getLista(request, "/api/personas");
         request.setAttribute("personas", personas);
-        request.setAttribute("roles", ClienteBackend.getLista("/api/roles"));
+        request.setAttribute("roles", ClienteBackend.getLista(request, "/api/roles"));
         marcarEdicion(request, personas);
     }
 
@@ -31,13 +31,13 @@ public class PersonasServlet extends PantallaServlet {
         ClienteBackend.Respuesta respuesta;
 
         if (request.getServletPath().equals("/personas/baja")) {
-            respuesta = ClienteBackend.delete("/api/personas/" + request.getParameter("id"));
+            respuesta = ClienteBackend.delete(request, "/api/personas/" + request.getParameter("id"));
         } else if (esEdicion(request)) {
             // Al editar no se toca la contraseña: eso lo hace cada uno desde "Mi cuenta"
-            respuesta = ClienteBackend.put("/api/personas/" + request.getParameter("id"),
+            respuesta = ClienteBackend.put(request, "/api/personas/" + request.getParameter("id"),
                     Formulario.campos(request, "nombre", "dni", "direccion", "email", "telefono", "rolId"));
         } else {
-            respuesta = ClienteBackend.post("/api/personas",
+            respuesta = ClienteBackend.post(request, "/api/personas",
                     Formulario.campos(request, "nombre", "dni", "direccion", "email", "telefono", "rolId", "contrasenia"));
         }
         responder(respuesta, "/personas", request, response);

@@ -1,6 +1,7 @@
 package com.sixt.frontend.controlador;
 
 import jakarta.servlet.FilterChain;
+import com.sixt.frontend.ClienteBackend;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpFilter;
@@ -18,16 +19,18 @@ import java.util.Map;
 @WebFilter("/*")
 public class FiltroLogin extends HttpFilter {
 
-    private static final Map<String, String> PERMISO_POR_PANTALLA = Map.of(
-            "/oficinas", "ADMINISTRAR",
-            "/vehiculos", "ADMINISTRAR",
-            "/vehiculos/baja", "ADMINISTRAR",
-            "/personas", "ADMINISTRAR",
-            "/personas/baja", "ADMINISTRAR",
-            "/roles", "ADMINISTRAR",
-            "/reservas", "VENDER",
-            "/reservas/devolver", "VENDER",
-            "/mis-reservas", "ALQUILAR");
+    private static final Map<String, String> PERMISO_POR_PANTALLA = Map.ofEntries(
+            Map.entry("/oficinas", "ADMINISTRAR"),
+            Map.entry("/vehiculos", "ADMINISTRAR"),
+            Map.entry("/vehiculos/baja", "ADMINISTRAR"),
+            Map.entry("/personas", "ADMINISTRAR"),
+            Map.entry("/personas/baja", "ADMINISTRAR"),
+            Map.entry("/roles", "ADMINISTRAR"),
+            Map.entry("/clientes", "ADMINISTRAR_CLIENTES"),
+            Map.entry("/clientes/baja", "ADMINISTRAR_CLIENTES"),
+            Map.entry("/reservas", "VENDER"),
+            Map.entry("/reservas/devolver", "VENDER"),
+            Map.entry("/mis-reservas", "ALQUILAR"));
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -43,6 +46,18 @@ public class FiltroLogin extends HttpFilter {
         if (usuario == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
+        }
+
+        if (!ruta.equals("/logout")) {
+            ClienteBackend.Respuesta estado = ClienteBackend.consultarSesion(request);
+            if (estado.estado() == 401) {
+                sesion.invalidate();
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            if (!estado.ok()) throw new ServletException(estado.error());
+            usuario = estado.cuerpo();
+            sesion.setAttribute("usuario", usuario);
         }
 
         String permisoNecesario = PERMISO_POR_PANTALLA.get(ruta);

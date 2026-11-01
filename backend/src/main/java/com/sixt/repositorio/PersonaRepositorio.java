@@ -9,6 +9,8 @@ public interface PersonaRepositorio extends JpaRepository<Persona, Long> {
 
     List<Persona> findByFechaBajaIsNull();
 
+    List<Persona> findByRolNombreIgnoreCaseAndFechaBajaIsNull(String nombre);
+
     Optional<Persona> findByEmailIgnoreCase(String email);
 
     boolean existsByDni(int dni);

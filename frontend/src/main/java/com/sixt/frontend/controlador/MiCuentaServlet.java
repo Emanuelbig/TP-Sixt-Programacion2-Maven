@@ -27,7 +27,7 @@ public class MiCuentaServlet extends PantallaServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         Object id = UsuarioEnSesion.id(request);
-        ClienteBackend.Respuesta respuesta = ClienteBackend.patch("/api/personas/" + id + "/contrasenia",
+        ClienteBackend.Respuesta respuesta = ClienteBackend.patch(request, "/api/personas/" + id + "/contrasenia",
                 Formulario.campos(request, "contraseniaActual", "contraseniaNueva"));
         responder(respuesta, "/mi-cuenta?ok", request, response);
     }

@@ -39,11 +39,16 @@ public class CargaDatosIniciales implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (rolRepositorio.count() > 0) {
+            for (String nombre : new String[] {"ADMIN", "VENDEDOR"}) {
+                rolRepositorio.findByNombreIgnoreCase(nombre).ifPresent(rol -> {
+                    if (rol.getPermisos().add(Permiso.ADMINISTRAR_CLIENTES)) rolRepositorio.save(rol);
+                });
+            }
             return;
         }
 
-        Rol admin = rol("ADMIN", Permiso.ADMINISTRAR, Permiso.VENDER);
-        Rol vendedor = rol("VENDEDOR", Permiso.VENDER);
+        Rol admin = rol("ADMIN", Permiso.ADMINISTRAR, Permiso.VENDER, Permiso.ADMINISTRAR_CLIENTES);
+        Rol vendedor = rol("VENDEDOR", Permiso.VENDER, Permiso.ADMINISTRAR_CLIENTES);
         Rol cliente = rol("CLIENTE", Permiso.ALQUILAR);
 
         persona(1, "Administrador inicial", "admin@sixt.com.ar", "1100000000", "Av. Corrientes 1000", "admin123", admin);

@@ -16,7 +16,13 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         if (request.getServletPath().equals("/logout")) {
-            request.getSession().invalidate();
+            try {
+                ClienteBackend.post(request, "/api/logout", java.util.Map.of());
+            } catch (ServletException e) {
+                log("No se pudo cerrar la sesion remota; se cierra la sesion local", e);
+            } finally {
+                request.getSession().invalidate();
+            }
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -27,7 +33,7 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // El backend decide si el email y la contraseña son validos
-        ClienteBackend.Respuesta respuesta = ClienteBackend.post("/api/login",
+        ClienteBackend.Respuesta respuesta = ClienteBackend.post(request, "/api/login",
                 Formulario.campos(request, "email", "contrasenia"));
 
         if (respuesta.ok()) {
@@ -37,7 +43,9 @@ public class LoginServlet extends HttpServlet {
             if (anterior != null) {
                 anterior.invalidate();
             }
-            request.getSession(true).setAttribute("usuario", respuesta.cuerpo());
+            HttpSession nueva = request.getSession(true);
+            nueva.setAttribute("usuario", respuesta.cuerpo());
+            nueva.setAttribute("cookieBackend", respuesta.cookieSesion());
             response.sendRedirect(request.getContextPath() + "/inicio");
         } else {
             request.setAttribute("error", respuesta.error());

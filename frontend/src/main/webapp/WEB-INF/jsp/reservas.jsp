@@ -66,11 +66,8 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Vendedor</label>
-                        <select name="vendedorId" class="form-select">
-                            <c:forEach var="persona" items="${personas}">
-                                <c:if test="${persona.rol.permisos.contains('VENDER')}"><option value="${persona.id}" ${persona.id == usuario.id ? 'selected' : ''}>${persona.nombre}</option></c:if>
-                            </c:forEach>
-                        </select>
+                        <input type="hidden" name="vendedorId" value="${usuario.id}">
+                        <p class="form-control-plaintext"><c:out value="${usuario.nombre}"/></p>
                     </div>
                     <fieldset class="col-12">
                         <legend class="fs-6">Vehículos y combustible inicial</legend>

@@ -20,6 +20,12 @@ public class ManejadorDeErrores {
 
     private static final Logger log = LoggerFactory.getLogger(ManejadorDeErrores.class);
 
+    @ExceptionHandler(AccesoDenegadoExcepcion.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public RespuestaError accesoDenegado(AccesoDenegadoExcepcion e) {
+        return new RespuestaError(e.getMessage());
+    }
+
     @ExceptionHandler(RecursoNoEncontradoExcepcion.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public RespuestaError noEncontrado(RecursoNoEncontradoExcepcion e) {

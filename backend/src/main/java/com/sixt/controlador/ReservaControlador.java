@@ -1,6 +1,10 @@
 package com.sixt.controlador;
 
 import com.sixt.dto.NuevaReserva;
+import com.sixt.dto.UsuarioLogueado;
+import com.sixt.modelo.Permiso;
+import com.sixt.excepcion.AccesoDenegadoExcepcion;
+import jakarta.servlet.http.HttpServletRequest;
 import com.sixt.modelo.Reserva;
 import com.sixt.servicio.ReservaServicio;
 import jakarta.validation.Valid;
@@ -26,13 +30,20 @@ public class ReservaControlador {
     // GET /api/reservas            -> todas
     // GET /api/reservas?clienteId=3 -> solo las de ese cliente ("Mis reservas")
     @GetMapping
-    public List<Reserva> listar(@RequestParam(required = false) Long clienteId) {
+    public List<Reserva> listar(@RequestParam(required = false) Long clienteId, HttpServletRequest request) {
+        var usuario = (UsuarioLogueado) request.getAttribute("usuarioAutenticado");
+        if (!usuario.permisos().contains(Permiso.VENDER)) {
+            if (clienteId != null && !clienteId.equals(usuario.id())) throw new AccesoDenegadoExcepcion();
+            return reservaServicio.listarDeCliente(usuario.id());
+        }
         return clienteId == null ? reservaServicio.listar() : reservaServicio.listarDeCliente(clienteId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Reserva crear(@Valid @RequestBody NuevaReserva datos) {
+    public Reserva crear(@Valid @RequestBody NuevaReserva datos, HttpServletRequest request) {
+        var usuario = (UsuarioLogueado) request.getAttribute("usuarioAutenticado");
+        if (!usuario.id().equals(datos.vendedorId())) throw new AccesoDenegadoExcepcion();
         return reservaServicio.crear(datos);
     }
 

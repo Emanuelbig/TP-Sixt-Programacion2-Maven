@@ -14,7 +14,7 @@ public class OficinasServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
-        List<Map<String, Object>> oficinas = ClienteBackend.getLista("/api/oficinas");
+        List<Map<String, Object>> oficinas = ClienteBackend.getLista(request, "/api/oficinas");
         request.setAttribute("oficinas", oficinas);
         marcarEdicion(request, oficinas);
     }
@@ -30,8 +30,8 @@ public class OficinasServlet extends PantallaServlet {
             throws ServletException, IOException {
         Map<String, Object> datos = Formulario.campos(request, "zona", "direccion");
         ClienteBackend.Respuesta respuesta = esEdicion(request)
-                ? ClienteBackend.put("/api/oficinas/" + request.getParameter("id"), datos)
-                : ClienteBackend.post("/api/oficinas", datos);
+                ? ClienteBackend.put(request, "/api/oficinas/" + request.getParameter("id"), datos)
+                : ClienteBackend.post(request, "/api/oficinas", datos);
         responder(respuesta, "/oficinas", request, response);
     }
 }

@@ -16,10 +16,10 @@ public class ReservasServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
-        request.setAttribute("reservas", ClienteBackend.getLista("/api/reservas"));
-        request.setAttribute("personas", ClienteBackend.getLista("/api/personas"));
-        request.setAttribute("vehiculos", ClienteBackend.getLista("/api/vehiculos"));
-        request.setAttribute("oficinas", ClienteBackend.getLista("/api/oficinas"));
+        request.setAttribute("reservas", ClienteBackend.getLista(request, "/api/reservas"));
+        request.setAttribute("personas", ClienteBackend.getLista(request, "/api/clientes"));
+        request.setAttribute("vehiculos", ClienteBackend.getLista(request, "/api/vehiculos"));
+        request.setAttribute("oficinas", ClienteBackend.getLista(request, "/api/oficinas"));
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ReservasServlet extends PantallaServlet {
         ClienteBackend.Respuesta respuesta;
 
         if (request.getServletPath().equals("/reservas/devolver")) {
-            respuesta = ClienteBackend.post("/api/reservas/" + request.getParameter("id") + "/devolver", Map.of());
+            respuesta = ClienteBackend.post(request, "/api/reservas/" + request.getParameter("id") + "/devolver", Map.of());
         } else {
             Map<String, Object> datos = Formulario.campos(request,
                     "clienteId", "vendedorId", "oficinaOrigenId", "oficinaDestinoId",
@@ -47,7 +47,7 @@ public class ReservasServlet extends PantallaServlet {
                 detalles.add(detalle);
             }
             datos.put("detalles", detalles);
-            respuesta = ClienteBackend.post("/api/reservas", datos);
+            respuesta = ClienteBackend.post(request, "/api/reservas", datos);
         }
         responder(respuesta, "/reservas", request, response);
     }

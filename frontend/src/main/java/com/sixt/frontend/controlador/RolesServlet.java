@@ -13,8 +13,8 @@ public class RolesServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
-        request.setAttribute("roles", ClienteBackend.getLista("/api/roles"));
-        request.setAttribute("permisos", ClienteBackend.getLista("/api/permisos"));
+        request.setAttribute("roles", ClienteBackend.getLista(request, "/api/roles"));
+        request.setAttribute("permisos", ClienteBackend.getLista(request, "/api/permisos"));
     }
 
     @Override
@@ -27,6 +27,6 @@ public class RolesServlet extends PantallaServlet {
             throws ServletException, IOException {
         Map<String, Object> datos = Formulario.campos(request, "nombre");
         datos.put("permisos", Formulario.lista(request, "permisos"));
-        responder(ClienteBackend.post("/api/roles", datos), "/roles", request, response);
+        responder(ClienteBackend.post(request, "/api/roles", datos), "/roles", request, response);
     }
 }
