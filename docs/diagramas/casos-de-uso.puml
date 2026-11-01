@@ -1,6 +1,7 @@
 @startuml casos-de-uso
-' Casos de uso por actor. Que puede hacer cada uno lo deciden los permisos de su rol:
-' ADMINISTRAR (Administrador), VENDER + ADMINISTRAR_CLIENTES (Vendedor), ALQUILAR (Cliente).
+' Casos de uso por actor, con la misma numeracion que el documento de evaluacion.
+' Que puede hacer cada uno lo deciden los permisos de su rol inicial:
+'   Cliente: ALQUILAR | Vendedor: VENDER + ADMINISTRAR_CLIENTES | Administrador: ADMINISTRAR + los del vendedor
 title Sixt - Diagrama de casos de uso
 
 left to right direction
@@ -16,79 +17,74 @@ skinparam package {
 }
 
 actor "Usuario" as usuario
-actor "Administrador" as admin
-actor "Vendedor" as vendedor
 actor "Cliente" as cliente
+actor "Vendedor" as vendedor
+actor "Administrador" as admin
 
-' Los tres son usuarios: heredan lo comun
-usuario <|-- admin
-usuario <|-- vendedor
+' Todos son usuarios. El administrador inicial tambien tiene los permisos del vendedor
 usuario <|-- cliente
+usuario <|-- vendedor
+vendedor <|-- admin
 
 rectangle "Sistema Sixt" {
-  package "Comun" {
-    usecase "Iniciar sesion" as UC1
-    usecase "Cerrar sesion" as UC2
-    usecase "Ver mis datos" as UC3
-    usecase "Cambiar contrasenia" as UC4
+  package "Comunes" {
+    usecase "CU01\nIniciar sesion" as CU01
+    usecase "CU02\nConsultar inicio" as CU02
+    usecase "CU03\nConsultar mi cuenta\ny cambiar contrasenia" as CU03
+    usecase "CU04\nCerrar sesion" as CU04
   }
 
   package "Administracion" {
-    usecase "Gestionar oficinas\n(alta, edicion, baja)" as UC10
-    usecase "Gestionar vehiculos\n(alta, edicion, baja)" as UC11
-    usecase "Gestionar catalogo:\nmodelos y tipos" as UC12
-    usecase "Cambiar precio por dia\nde un tipo" as UC13
-    usecase "Gestionar personas\n(alta, edicion, baja)" as UC14
-    usecase "Gestionar roles\ny sus permisos" as UC15
-    usecase "Ver resumen del sistema" as UC16
+    usecase "CU05\nGestionar oficinas" as CU05
+    usecase "CU06\nGestionar catalogo\n(modelos, tipos y precios)" as CU06
+    usecase "CU07\nGestionar vehiculos" as CU07
+    usecase "CU08\nGestionar personas" as CU08
+    usecase "CU09\nGestionar roles" as CU09
   }
 
   package "Ventas" {
-    usecase "Gestionar clientes\n(alta, edicion, baja)" as UC20
-    usecase "Crear reserva\npara un cliente" as UC21
-    usecase "Marcar reserva\ncomo devuelta" as UC22
-    usecase "Cancelar reserva" as UC23
-    usecase "Ver todas las reservas" as UC24
+    usecase "CU10\nGestionar clientes" as CU10
+    usecase "CU11\nRegistrar reserva asistida" as CU11
+    usecase "CU12\nRegistrar devolucion" as CU12
+    usecase "CU16\nCancelar reserva" as CU16
   }
 
   package "Alquiler" {
-    usecase "Reservar un auto\n(reserva online)" as UC30
-    usecase "Ver mis reservas" as UC31
-    usecase "Cancelar mi reserva" as UC32
+    usecase "CU13\nReservar online" as CU13
+    usecase "CU14\nConsultar mis reservas" as CU14
+    usecase "CU17\nCancelar mi reserva" as CU17
   }
 
-  usecase "Buscar vehiculos disponibles\npor fechas y oficinas" as UC40
+  usecase "CU15\nBuscar disponibilidad" as CU15
 }
 
-usuario --> UC1
-usuario --> UC2
-usuario --> UC3
-usuario --> UC4
+usuario --> CU01
+usuario --> CU02
+usuario --> CU03
+usuario --> CU04
 
-admin --> UC10
-admin --> UC11
-admin --> UC12
-admin --> UC14
-admin --> UC15
-admin --> UC16
-UC13 .> UC12 : <<extend>>
+admin --> CU05
+admin --> CU06
+admin --> CU07
+admin --> CU08
+admin --> CU09
 
-vendedor --> UC20
-vendedor --> UC21
-vendedor --> UC22
-vendedor --> UC23
-vendedor --> UC24
-vendedor --> UC16
+vendedor --> CU10
+vendedor --> CU11
+vendedor --> CU12
+vendedor --> CU16
 
-cliente --> UC30
-cliente --> UC31
-cliente --> UC32
+cliente --> CU13
+cliente --> CU14
+cliente --> CU17
 
-UC21 ..> UC40 : <<include>>
-UC30 ..> UC40 : <<include>>
+CU11 ..> CU15 : <<include>>
+CU13 ..> CU15 : <<include>>
 
-note bottom of UC23
-  Solo si la reserva no fue devuelta
-  y todavia no empezo.
+note right of CU15
+  Devuelve los vehiculos activos sin reservas
+  vigentes (ni devueltas ni canceladas)
+  que se superpongan con las fechas.
 end note
+
 @enduml

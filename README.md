@@ -84,19 +84,29 @@ Cada rol ve solo las pantallas de sus permisos (`FiltroLogin` devuelve 403 si no
 | Método | Ruta | Qué hace |
 |---|---|---|
 | POST | `/api/login` | Valida email y contraseña, devuelve el usuario y sus permisos |
-| GET | `/api/resumen` | Contadores para el inicio |
-| GET / POST | `/api/oficinas` | Listar / crear oficinas |
-| PUT | `/api/oficinas/{id}` | Editar una oficina |
+| GET | `/api/sesion` | Datos y permisos de quien inició sesión |
+| POST | `/api/logout` | Cierra la sesión |
+| GET | `/api/resumen` | Contadores para el inicio (solo lo activo) |
+| GET / POST | `/api/oficinas` | Listar (activas) / crear oficinas |
+| PUT / DELETE | `/api/oficinas/{id}` | Editar / dar de baja (lógica) una oficina |
 | GET / POST | `/api/vehiculos` | Listar (activos) / crear vehículos |
 | PUT / DELETE | `/api/vehiculos/{id}` | Editar / dar de baja (lógica) un vehículo |
-| GET | `/api/modelos` | Listar modelos |
+| GET | `/api/vehiculos/disponibles?desde=&hasta=` | Vehículos libres en ese rango de fechas |
+| GET / POST | `/api/modelos` | Listar / crear modelos |
+| PUT / DELETE | `/api/modelos/{id}` | Editar / eliminar un modelo (solo si ningún vehículo lo usa) |
+| GET / POST | `/api/tipos` | Listar / crear tipos con su precio por día |
+| PUT / DELETE | `/api/tipos/{id}` | Editar (cambiar precio) / eliminar un tipo (solo si ningún modelo lo usa) |
 | GET / POST | `/api/personas` | Listar (activas) / crear personas |
 | PUT / DELETE | `/api/personas/{id}` | Editar / dar de baja (lógica) una persona |
-| PATCH | `/api/personas/{id}/contrasenia` | Cambiar la contraseña |
+| PATCH | `/api/personas/{id}/contrasenia` | Cambiar la contraseña propia |
+| GET / POST | `/api/clientes` | Listar / crear clientes (rol CLIENTE) |
+| PUT / DELETE | `/api/clientes/{id}` | Editar / dar de baja (lógica) un cliente |
 | GET / POST | `/api/roles` | Listar / crear roles con sus permisos |
+| PUT / DELETE | `/api/roles/{id}` | Editar / eliminar un rol (solo si nadie lo tiene asignado) |
 | GET | `/api/permisos` | Listar los permisos disponibles |
-| GET / POST | `/api/reservas` | Listar (todas o `?clienteId=`) / crear reservas |
+| GET / POST | `/api/reservas` | Listar (todas o `?clienteId=`) / crear reservas (vendedor o reserva online del cliente) |
 | POST | `/api/reservas/{id}/devolver` | Marcar una reserva como devuelta |
+| POST | `/api/reservas/{id}/cancelar` | Cancelar una reserva que todavía no empezó |
 
 Errores: siempre `{"error": "mensaje"}` con 400 (datos inválidos), 401 (login),
 404 (no existe), 409 (repetido o no disponible).
