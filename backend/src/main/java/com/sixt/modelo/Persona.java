@@ -34,6 +34,9 @@ public class Persona {
 
     private String nombre;
 
+    @Column(length = 500)
+    private String direccion;
+
     @Column(unique = true, nullable = false)
     private String email;
 

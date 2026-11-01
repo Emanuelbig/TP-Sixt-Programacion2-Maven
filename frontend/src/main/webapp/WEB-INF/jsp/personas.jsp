@@ -8,7 +8,7 @@
                     <div class="table-responsive">
                         <table class="table table-hover table-striped mb-0 align-middle">
                             <thead class="table-dark">
-                                <tr><th>#</th><th>Nombre</th><th>DNI</th><th>Email</th><th>Teléfono</th><th>Rol</th><th></th></tr>
+                                <tr><th>#</th><th>Nombre</th><th>DNI</th><th>Dirección</th><th>Email</th><th>Teléfono</th><th>Rol</th><th></th></tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="persona" items="${personas}">
@@ -16,6 +16,7 @@
                                         <td>${persona.id}</td>
                                         <td class="fw-semibold">${persona.nombre}</td>
                                         <td>${persona.dni}</td>
+                                        <td><c:out value="${persona.direccion}"/></td>
                                         <td class="text-muted">${persona.email}</td>
                                         <td>${persona.telefono}</td>
                                         <td><span class="badge bg-secondary">${persona.rol.nombre}</span></td>
@@ -29,7 +30,7 @@
                                     </tr>
                                 </c:forEach>
                                 <c:if test="${empty personas}">
-                                    <tr><td colspan="7" class="text-center text-muted">No hay personas cargadas</td></tr>
+                                    <tr><td colspan="8" class="text-center text-muted">No hay personas cargadas</td></tr>
                                 </c:if>
                             </tbody>
                         </table>
@@ -53,6 +54,11 @@
                             <div class="mb-3">
                                 <label class="form-label">DNI</label>
                                 <input name="dni" value="${editando.dni}" type="number" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <input id="direccion" name="direccion" value="${fn:escapeXml(editando.direccion)}"
+                                       class="form-control" maxlength="500" autocomplete="street-address" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Email</label>

@@ -177,3 +177,13 @@ como respaldo nullable. Puede repetirse sin duplicar los detalles migrados.
 `ddl-auto=update` por si solo no mueve los datos existentes.
 
 Luego reconstruir con `docker compose up -d --build`.
+
+## Direccion de clientes
+
+La direccion se guarda en `Persona` (modelo compartido por los tres roles),
+se carga y edita desde Personas y se muestra tambien en Mi cuenta al iniciar sesion.
+Los cuerpos de `POST /api/personas` y `PUT /api/personas/{id}` deben incluir
+`direccion`: texto obligatorio de hasta 500 caracteres. Se recortan espacios exteriores.
+Hibernate agrega la columna al iniciar con `ddl-auto=update`; no hace falta una
+migracion manual para este campo. Los registros anteriores quedan con direccion
+vacia hasta completarla desde la edicion; no se inventan domicilios para ellos.

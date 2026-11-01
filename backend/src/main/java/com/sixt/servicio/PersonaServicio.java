@@ -93,6 +93,7 @@ public class PersonaServicio {
     private Persona guardar(Persona persona, DatosPersona datos) {
         persona.setDni(datos.dni());
         persona.setNombre(datos.nombre().trim());
+        persona.setDireccion(datos.direccion().trim());
         persona.setEmail(normalizarEmail(datos.email()));
         persona.setTelefono(datos.telefono());
         persona.setRol(rolServicio.buscar(datos.rolId()));

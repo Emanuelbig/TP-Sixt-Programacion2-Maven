@@ -46,9 +46,9 @@ public class CargaDatosIniciales implements CommandLineRunner {
         Rol vendedor = rol("VENDEDOR", Permiso.VENDER);
         Rol cliente = rol("CLIENTE", Permiso.ALQUILAR);
 
-        persona(1, "Administrador inicial", "admin@sixt.com.ar", "1100000000", "admin123", admin);
-        persona(30111222, "Pepe Vendedor", "pepe@sixt.com.ar", "1133445566", "vendedor123", vendedor);
-        persona(38258469, "Ema Morano", "ema@gmail.com", "1133168094", "cliente123", cliente);
+        persona(1, "Administrador inicial", "admin@sixt.com.ar", "1100000000", "Av. Corrientes 1000", "admin123", admin);
+        persona(30111222, "Pepe Vendedor", "pepe@sixt.com.ar", "1133445566", "Av. Rivadavia 2000", "vendedor123", vendedor);
+        persona(38258469, "Ema Morano", "ema@gmail.com", "1133168094", "Av. Acoyte 300", "cliente123", cliente);
 
         Oficina ofi1 = oficina("Ofi 1", "Corrientes y Callao");
         oficina("Ofi 2", "Acoyte 721");
@@ -71,12 +71,13 @@ public class CargaDatosIniciales implements CommandLineRunner {
         return rolRepositorio.save(r);
     }
 
-    private void persona(int dni, String nombre, String email, String telefono, String contrasenia, Rol rol) {
+    private void persona(int dni, String nombre, String email, String telefono, String direccion, String contrasenia, Rol rol) {
         Persona p = new Persona();
         p.setDni(dni);
         p.setNombre(nombre);
         p.setEmail(email);
         p.setTelefono(telefono);
+        p.setDireccion(direccion);
         p.setContrasenia(codificador.encode(contrasenia));
         p.setRol(rol);
         personaRepositorio.save(p);

@@ -8,6 +8,7 @@
                     <div class="card-header">Mis datos</div>
                     <div class="card-body">
                         <p class="mb-1"><strong>Nombre:</strong> ${usuario.nombre}</p>
+                        <p class="mb-1"><strong>Dirección:</strong> <c:out value="${usuario.direccion}"/></p>
                         <p class="mb-1"><strong>Email:</strong> ${usuario.email}</p>
                         <p class="mb-1"><strong>Rol:</strong> ${usuario.rol}</p>
                         <p class="mb-0"><strong>Permisos:</strong>

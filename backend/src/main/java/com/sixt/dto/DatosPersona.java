@@ -19,6 +19,10 @@ public record DatosPersona(
         @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
         String nombre,
 
+        @NotBlank(message = "La direccion es obligatoria")
+        @Size(max = 500, message = "La direccion no puede superar los 500 caracteres")
+        String direccion,
+
         @NotBlank(message = "El email es obligatorio")
         @Email(message = "El email no tiene un formato valido")
         String email,
