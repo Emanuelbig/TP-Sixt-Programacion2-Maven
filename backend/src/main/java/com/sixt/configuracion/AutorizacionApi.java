@@ -69,9 +69,10 @@ public class AutorizacionApi extends OncePerRequestFilter {
             exigir(usuario, Permiso.ADMINISTRAR_CLIENTES);
         } else if (ruta.equals("/api/reservas") || ruta.startsWith("/api/reservas/")) {
             boolean alta = ruta.equals("/api/reservas") && "POST".equals(metodo);
-            if ((lectura || alta) && !usuario.permisos().contains(Permiso.VENDER)) {
+            boolean cancelacion = ruta.matches("/api/reservas/\\d+/cancelar") && "POST".equals(metodo);
+            if ((lectura || alta || cancelacion) && !usuario.permisos().contains(Permiso.VENDER)) {
                 exigir(usuario, Permiso.ALQUILAR);
-                // El controlador limita la consulta y el alta a la identidad autenticada.
+                // El controlador limita la consulta, el alta y la cancelacion a la identidad autenticada.
             } else exigir(usuario, Permiso.VENDER);
         } else if (lectura && (ruta.equals("/api/vehiculos/disponibles") || ruta.equals("/api/oficinas"))) {
             // Las necesita el buscador de reservas: lo usan vendedores y clientes

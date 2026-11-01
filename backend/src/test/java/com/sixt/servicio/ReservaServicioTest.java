@@ -56,7 +56,7 @@ class ReservaServicioTest {
         when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
         when(personaServicio.buscarActiva(3L)).thenReturn(cliente);
         when(personaServicio.buscarActiva(2L)).thenReturn(vendedor);
-        when(oficinaServicio.buscar(any())).thenReturn(new Oficina());
+        when(oficinaServicio.buscarActiva(any())).thenReturn(new Oficina());
         when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(new BigDecimal("30000"));
         when(reservaRepositorio.save(any())).thenAnswer(invocacion -> invocacion.getArgument(0));
 
@@ -151,7 +151,7 @@ class ReservaServicioTest {
         when(vehiculoServicio.buscarActivo(2L)).thenReturn(segundo);
         when(personaServicio.buscarActiva(3L)).thenReturn(cliente);
         when(personaServicio.buscarActiva(2L)).thenReturn(vendedor);
-        when(oficinaServicio.buscar(any())).thenReturn(new Oficina());
+        when(oficinaServicio.buscarActiva(any())).thenReturn(new Oficina());
         when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(new BigDecimal("30000"));
         when(calculadoraPrecio.calcular(segundo, DESDE, HASTA)).thenReturn(new BigDecimal("54000"));
         when(reservaRepositorio.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -200,6 +200,57 @@ class ReservaServicioTest {
         assertThatThrownBy(() -> reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA,
                 List.of(new NuevoDetalleReserva(1L, -1)))))
                 .isInstanceOf(DatosInvalidosExcepcion.class);
+    }
+
+    // ----- Cancelar -----
+
+    @Test
+    void cancelaUnaReservaQueTodaviaNoEmpezo() {
+        Reserva reserva = reservaGuardada(LocalDate.now().plusDays(3), false);
+        when(reservaRepositorio.findById(7L)).thenReturn(Optional.of(reserva));
+        when(reservaRepositorio.save(reserva)).thenReturn(reserva);
+
+        reservaServicio.cancelar(7L);
+
+        assertThat(reserva.getFechaCancelacion()).isNotNull();
+    }
+
+    @Test
+    void noCancelaUnaReservaQueYaEmpezo() {
+        Reserva reserva = reservaGuardada(LocalDate.now(), false);
+        when(reservaRepositorio.findById(7L)).thenReturn(Optional.of(reserva));
+
+        assertThatThrownBy(() -> reservaServicio.cancelar(7L))
+                .isInstanceOf(ConflictoExcepcion.class).hasMessageContaining("ya empezo");
+        verify(reservaRepositorio, never()).save(any());
+    }
+
+    @Test
+    void noCancelaUnaReservaDevuelta() {
+        Reserva reserva = reservaGuardada(LocalDate.now().plusDays(3), true);
+        when(reservaRepositorio.findById(7L)).thenReturn(Optional.of(reserva));
+
+        assertThatThrownBy(() -> reservaServicio.cancelar(7L))
+                .isInstanceOf(ConflictoExcepcion.class).hasMessageContaining("devuelta");
+    }
+
+    @Test
+    void noDevuelveUnaReservaCancelada() {
+        Reserva reserva = reservaGuardada(LocalDate.now().plusDays(3), false);
+        reserva.setFechaCancelacion(java.time.Instant.now());
+        when(reservaRepositorio.findById(7L)).thenReturn(Optional.of(reserva));
+
+        assertThatThrownBy(() -> reservaServicio.devolver(7L))
+                .isInstanceOf(ConflictoExcepcion.class).hasMessageContaining("cancelada");
+    }
+
+    private static Reserva reservaGuardada(LocalDate desde, boolean devuelta) {
+        Reserva reserva = new Reserva();
+        reserva.setId(7L);
+        reserva.setFechaDesde(desde);
+        reserva.setFechaHasta(desde.plusDays(2));
+        reserva.setDevuelto(devuelta);
+        return reserva;
     }
 
     private static NuevaReserva pedido(LocalDate desde, LocalDate hasta, Long clienteId, Long vendedorId) {

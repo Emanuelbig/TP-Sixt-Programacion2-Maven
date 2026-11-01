@@ -8,6 +8,7 @@ import com.sixt.modelo.Modelo;
 import com.sixt.modelo.TipoModelo;
 import com.sixt.repositorio.ModeloRepositorio;
 import com.sixt.repositorio.TipoModeloRepositorio;
+import com.sixt.repositorio.VehiculoRepositorio;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class ModeloServicio {
 
     private final ModeloRepositorio modeloRepositorio;
     private final TipoModeloRepositorio tipoModeloRepositorio;
+    private final VehiculoRepositorio vehiculoRepositorio;
 
     // ----- Tipos y precios -----
 
@@ -57,6 +59,16 @@ public class ModeloServicio {
     }
 
     // Los tipos se guardan en mayusculas (AUTO, CAMIONETA), igual que los que carga el sistema
+    // Se borra de verdad: solo se permite si ningun modelo es de este tipo
+    @Transactional
+    public void eliminarTipo(Long id) {
+        TipoModelo tipo = buscarTipo(id);
+        if (modeloRepositorio.existsByTipoId(id)) {
+            throw new ConflictoExcepcion("Hay modelos del tipo " + tipo.getNombre() + ", no se puede eliminar");
+        }
+        tipoModeloRepositorio.delete(tipo);
+    }
+
     private TipoModelo guardarTipo(TipoModelo tipo, String nombre, DatosTipoModelo datos) {
         tipo.setNombre(nombre);
         tipo.setPrecio(datos.precio());
@@ -96,6 +108,17 @@ public class ModeloServicio {
             throw new ConflictoExcepcion("Ya existe otro modelo " + marca + " " + nombre);
         }
         return guardarModelo(modelo, marca, nombre, datos.tipoId());
+    }
+
+    // Se borra de verdad: solo se permite si ningun vehiculo (ni siquiera uno dado de baja) lo usa
+    @Transactional
+    public void eliminarModelo(Long id) {
+        Modelo modelo = buscarModelo(id);
+        if (vehiculoRepositorio.existsByModeloId(id)) {
+            throw new ConflictoExcepcion("Hay vehiculos " + modelo.getMarca() + " " + modelo.getNombre()
+                    + ", no se puede eliminar el modelo");
+        }
+        modeloRepositorio.delete(modelo);
     }
 
     private Modelo guardarModelo(Modelo modelo, String marca, String nombre, Long tipoId) {

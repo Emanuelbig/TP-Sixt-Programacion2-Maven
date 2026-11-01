@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 
 // Pantalla del vendedor: todas las reservas + reservar para cualquier cliente
-@WebServlet(urlPatterns = {"/reservas", "/reservas/devolver"})
+@WebServlet(urlPatterns = {"/reservas", "/reservas/devolver", "/reservas/cancelar"})
 public class ReservasServlet extends PantallaServlet {
 
     @Override
@@ -30,9 +30,12 @@ public class ReservasServlet extends PantallaServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (request.getServletPath().equals("/reservas/devolver")) {
+        // Devolver o cancelar: misma forma, cambia la accion al final de la URL
+        String ruta = request.getServletPath();
+        if (ruta.equals("/reservas/devolver") || ruta.equals("/reservas/cancelar")) {
+            String accion = ruta.substring("/reservas/".length());
             ClienteBackend.Respuesta respuesta = ClienteBackend.post(request,
-                    "/api/reservas/" + request.getParameter("id") + "/devolver", Map.of());
+                    "/api/reservas/" + request.getParameter("id") + "/" + accion, Map.of());
             responder(respuesta, "/reservas", request, response);
             return;
         }

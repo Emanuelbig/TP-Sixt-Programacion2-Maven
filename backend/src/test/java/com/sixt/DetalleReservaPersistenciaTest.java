@@ -59,7 +59,7 @@ class DetalleReservaPersistenciaTest {
             Long vehiculoId = detalle.getVehiculo().getId();
             assertThat(reservas.vehiculoOcupadoEntre(vehiculoId, desde, hasta)).isTrue();
             assertThat(reservas.vehiculoOcupadoEntre(vehiculoId, hasta.plusDays(1), hasta.plusDays(2))).isFalse();
-            assertThat(reservas.existsByDetallesVehiculoIdAndDevueltoFalse(vehiculoId)).isTrue();
+            assertThat(reservas.existsByDetallesVehiculoIdAndDevueltoFalseAndFechaCancelacionIsNull(vehiculoId)).isTrue();
         }
         servicio.devolver(id);
         em.flush();
@@ -69,7 +69,7 @@ class DetalleReservaPersistenciaTest {
         for (var detalle : devuelta.getDetalles()) {
             assertThat(detalle.getVehiculo().getOficina().getId()).isEqualTo(destino.getId());
             assertThat(reservas.vehiculoOcupadoEntre(detalle.getVehiculo().getId(), desde, hasta)).isFalse();
-            assertThat(reservas.existsByDetallesVehiculoIdAndDevueltoFalse(detalle.getVehiculo().getId())).isFalse();
+            assertThat(reservas.existsByDetallesVehiculoIdAndDevueltoFalseAndFechaCancelacionIsNull(detalle.getVehiculo().getId())).isFalse();
         }
     }
 }

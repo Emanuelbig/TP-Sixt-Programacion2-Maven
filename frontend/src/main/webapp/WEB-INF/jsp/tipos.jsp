@@ -19,7 +19,16 @@
                                 <td>${tipo.id}</td>
                                 <td class="sx-negrita"><c:out value="${tipo.nombre}"/></td>
                                 <td class="sx-derecha sx-sin-corte">$ <fmt:formatNumber value="${tipo.precio}" minFractionDigits="2" maxFractionDigits="2"/></td>
-                                <td><a href="${ctx}/tipos?editar=${tipo.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a></td>
+                                <td>
+                                    <div class="sx-acciones">
+                                        <a href="${ctx}/tipos?editar=${tipo.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
+                                        <%-- Solo se puede si nadie lo usa: si no, el backend responde con el motivo --%>
+                                        <form action="${ctx}/tipos/baja" method="POST" onsubmit="return confirm('¿Eliminar este tipo?')">
+                                            <input type="hidden" name="id" value="${tipo.id}">
+                                            <button class="sx-btn sx-btn-chico sx-btn-peligro">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty tipos}">

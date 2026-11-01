@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,5 +38,12 @@ public class OficinaControlador {
     @PutMapping("/{id}")
     public Oficina actualizar(@PathVariable Long id, @Valid @RequestBody DatosOficina datos) {
         return oficinaServicio.actualizar(id, datos);
+    }
+
+    // Baja logica: responde 204 (sin cuerpo)
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void darDeBaja(@PathVariable Long id) {
+        oficinaServicio.darDeBaja(id);
     }
 }

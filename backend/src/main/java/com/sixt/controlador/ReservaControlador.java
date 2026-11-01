@@ -55,6 +55,17 @@ public class ReservaControlador {
         return reservaServicio.crear(datos);
     }
 
+    // POST /api/reservas/5/cancelar -> el vendedor cancela cualquiera, el cliente solo las suyas
+    @PostMapping("/{id}/cancelar")
+    public Reserva cancelar(@PathVariable Long id, HttpServletRequest request) {
+        var usuario = (UsuarioLogueado) request.getAttribute("usuarioAutenticado");
+        if (!usuario.permisos().contains(Permiso.VENDER)) {
+            Reserva reserva = reservaServicio.buscar(id);
+            if (!reserva.getCliente().getId().equals(usuario.id())) throw new AccesoDenegadoExcepcion();
+        }
+        return reservaServicio.cancelar(id);
+    }
+
     @PostMapping("/{id}/devolver")
     public Reserva devolver(@PathVariable Long id) {
         return reservaServicio.devolver(id);

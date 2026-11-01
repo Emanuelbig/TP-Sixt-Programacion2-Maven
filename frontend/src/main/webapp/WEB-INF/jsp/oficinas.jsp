@@ -14,7 +14,15 @@
                                 <td>${oficina.id}</td>
                                 <td class="sx-negrita"><c:out value="${oficina.zona}"/></td>
                                 <td class="sx-texto-gris"><c:out value="${oficina.direccion}"/></td>
-                                <td><a href="${ctx}/oficinas?editar=${oficina.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a></td>
+                                <td>
+                                    <div class="sx-acciones">
+                                        <a href="${ctx}/oficinas?editar=${oficina.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
+                                        <form action="${ctx}/oficinas/baja" method="POST" onsubmit="return confirm('¿Dar de baja esta oficina?')">
+                                            <input type="hidden" name="id" value="${oficina.id}">
+                                            <button class="sx-btn sx-btn-chico sx-btn-peligro">Dar de baja</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty oficinas}">

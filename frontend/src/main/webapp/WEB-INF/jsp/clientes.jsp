@@ -20,7 +20,7 @@
                                 <td>
                                     <div class="sx-acciones">
                                         <a href="${ctx}/clientes?editar=${persona.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
-                                        <form action="${ctx}/clientes/baja" method="POST">
+                                        <form action="${ctx}/clientes/baja" method="POST" onsubmit="return confirm('¿Dar de baja este cliente?')">
                                             <input type="hidden" name="id" value="${persona.id}">
                                             <button class="sx-btn sx-btn-chico sx-btn-peligro">Dar de baja</button>
                                         </form>

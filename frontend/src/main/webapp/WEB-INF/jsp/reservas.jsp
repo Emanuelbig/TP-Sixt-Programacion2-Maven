@@ -45,14 +45,26 @@
                             <td class="sx-derecha sx-negrita sx-sin-corte">$ <fmt:formatNumber value="${reserva.precioTotal}" minFractionDigits="2" maxFractionDigits="2"/></td>
                             <td>
                                 <c:choose>
+                                    <c:when test="${not empty reserva.fechaCancelacion}">
+                                        <span class="sx-etiqueta">Cancelada</span>
+                                    </c:when>
                                     <c:when test="${reserva.devuelto}">
                                         <span class="sx-etiqueta sx-etiqueta-ok">Devuelto</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <form action="${ctx}/reservas/devolver" method="POST">
-                                            <input type="hidden" name="id" value="${reserva.id}">
-                                            <button class="sx-btn sx-btn-chico sx-btn-borde sx-sin-corte">Marcar devuelto</button>
-                                        </form>
+                                        <div class="sx-acciones">
+                                            <form action="${ctx}/reservas/devolver" method="POST">
+                                                <input type="hidden" name="id" value="${reserva.id}">
+                                                <button class="sx-btn sx-btn-chico sx-btn-borde sx-sin-corte">Marcar devuelto</button>
+                                            </form>
+                                            <%-- Cancelar solo si todavia no empezo (las fechas ISO se comparan como texto) --%>
+                                            <c:if test="${reserva.fechaDesde > hoy}">
+                                                <form action="${ctx}/reservas/cancelar" method="POST" onsubmit="return confirm('¿Cancelar la reserva ${reserva.id}?')">
+                                                    <input type="hidden" name="id" value="${reserva.id}">
+                                                    <button class="sx-btn sx-btn-chico sx-btn-peligro">Cancelar</button>
+                                                </form>
+                                            </c:if>
+                                        </div>
                                     </c:otherwise>
                                 </c:choose>
                             </td>

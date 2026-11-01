@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,12 @@ public class ModeloControlador {
         return modeloServicio.actualizarModelo(id, datos);
     }
 
+    @DeleteMapping("/modelos/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminarModelo(@PathVariable Long id) {
+        modeloServicio.eliminarModelo(id);
+    }
+
     @GetMapping("/tipos")
     public List<TipoModelo> listarTipos() {
         return modeloServicio.listarTipos();
@@ -57,5 +64,11 @@ public class ModeloControlador {
     @PutMapping("/tipos/{id}")
     public TipoModelo actualizarTipo(@PathVariable Long id, @Valid @RequestBody DatosTipoModelo datos) {
         return modeloServicio.actualizarTipo(id, datos);
+    }
+
+    @DeleteMapping("/tipos/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminarTipo(@PathVariable Long id) {
+        modeloServicio.eliminarTipo(id);
     }
 }

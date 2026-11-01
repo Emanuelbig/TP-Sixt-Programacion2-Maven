@@ -84,7 +84,7 @@ public class VehiculoServicio {
     @Transactional
     public void darDeBaja(Long id) {
         Vehiculo vehiculo = buscarActivo(id);
-        if (reservaRepositorio.existsByDetallesVehiculoIdAndDevueltoFalse(id)) {
+        if (reservaRepositorio.existsByDetallesVehiculoIdAndDevueltoFalseAndFechaCancelacionIsNull(id)) {
             throw new ConflictoExcepcion("El vehiculo " + vehiculo.getPatente()
                     + " tiene reservas sin devolver, no se puede dar de baja");
         }
@@ -97,7 +97,7 @@ public class VehiculoServicio {
         vehiculo.setAnio(datos.anio());
         vehiculo.setModelo(modeloRepositorio.findById(datos.modeloId())
                 .orElseThrow(() -> new RecursoNoEncontradoExcepcion("el modelo", datos.modeloId())));
-        vehiculo.setOficina(oficinaServicio.buscar(datos.oficinaId()));
+        vehiculo.setOficina(oficinaServicio.buscarActiva(datos.oficinaId()));
         return vehiculoRepositorio.save(vehiculo);
     }
 

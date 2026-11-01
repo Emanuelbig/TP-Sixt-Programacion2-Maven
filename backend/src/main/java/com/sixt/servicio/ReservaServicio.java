@@ -16,6 +16,7 @@ import com.sixt.modelo.Reserva;
 import com.sixt.modelo.Vehiculo;
 import com.sixt.repositorio.ReservaRepositorio;
 import com.sixt.servicio.precio.CalculadoraPrecio;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -92,8 +93,8 @@ public class ReservaServicio {
         reserva.setCliente(cliente);
         reserva.setVendedor(vendedor);
         detalles.forEach(reserva::agregarDetalle);
-        reserva.setOficinaOrigen(oficinaServicio.buscar(datos.oficinaOrigenId()));
-        reserva.setOficinaDestino(oficinaServicio.buscar(datos.oficinaDestinoId()));
+        reserva.setOficinaOrigen(oficinaServicio.buscarActiva(datos.oficinaOrigenId()));
+        reserva.setOficinaDestino(oficinaServicio.buscarActiva(datos.oficinaDestinoId()));
         reserva.setFechaDesde(fechaDesde);
         reserva.setFechaHasta(fechaHasta);
         reserva.setPrecioTotal(total);
@@ -104,14 +105,42 @@ public class ReservaServicio {
     // La devolucion es conjunta: todos los vehiculos quedan en la oficina de destino
     @Transactional
     public Reserva devolver(Long id) {
-        Reserva reserva = reservaRepositorio.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoExcepcion("la reserva", id));
+        Reserva reserva = buscar(id);
         if (Boolean.TRUE.equals(reserva.getDevuelto())) {
             return reserva;
+        }
+        if (reserva.getFechaCancelacion() != null) {
+            throw new ConflictoExcepcion("La reserva " + id + " esta cancelada, no se puede devolver");
         }
         reserva.setDevuelto(true);
         reserva.getDetalles().forEach(detalle ->
                 detalle.getVehiculo().setOficina(reserva.getOficinaDestino()));
+        return reservaRepositorio.save(reserva);
+    }
+
+    public Reserva buscar(Long id) {
+        Reserva reserva = reservaRepositorio.findById(id).orElse(null);
+        if (reserva == null) {
+            throw new RecursoNoEncontradoExcepcion("la reserva", id);
+        }
+        return reserva;
+    }
+
+    // Se puede cancelar mientras no se haya retirado el auto: ni devuelta ni empezada.
+    // Quien puede cancelar cual (vendedor: cualquiera, cliente: las suyas) lo controla ReservaControlador
+    @Transactional
+    public Reserva cancelar(Long id) {
+        Reserva reserva = buscar(id);
+        if (reserva.getFechaCancelacion() != null) {
+            throw new ConflictoExcepcion("La reserva " + id + " ya estaba cancelada");
+        }
+        if (Boolean.TRUE.equals(reserva.getDevuelto())) {
+            throw new ConflictoExcepcion("La reserva " + id + " ya fue devuelta, no se puede cancelar");
+        }
+        if (!reserva.getFechaDesde().isAfter(LocalDate.now())) {
+            throw new ConflictoExcepcion("La reserva " + id + " ya empezo, no se puede cancelar");
+        }
+        reserva.setFechaCancelacion(Instant.now());
         return reservaRepositorio.save(reserva);
     }
 

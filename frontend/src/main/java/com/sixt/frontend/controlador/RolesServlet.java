@@ -6,15 +6,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
-@WebServlet("/roles")
+@WebServlet(urlPatterns = {"/roles", "/roles/baja"})
 public class RolesServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
-        request.setAttribute("roles", ClienteBackend.getLista(request, "/api/roles"));
+        List<Map<String, Object>> roles = ClienteBackend.getLista(request, "/api/roles");
+        request.setAttribute("roles", roles);
         request.setAttribute("permisos", ClienteBackend.getLista(request, "/api/permisos"));
+        marcarEdicion(request, roles);
     }
 
     @Override
@@ -25,8 +28,16 @@ public class RolesServlet extends PantallaServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Map<String, Object> datos = Formulario.campos(request, "nombre");
-        datos.put("permisos", Formulario.lista(request, "permisos"));
-        responder(ClienteBackend.post(request, "/api/roles", datos), "/roles", request, response);
+        ClienteBackend.Respuesta respuesta;
+        if (request.getServletPath().equals("/roles/baja")) {
+            respuesta = ClienteBackend.delete(request, "/api/roles/" + request.getParameter("id"));
+        } else {
+            Map<String, Object> datos = Formulario.campos(request, "nombre");
+            datos.put("permisos", Formulario.lista(request, "permisos"));
+            respuesta = esEdicion(request)
+                    ? ClienteBackend.put(request, "/api/roles/" + request.getParameter("id"), datos)
+                    : ClienteBackend.post(request, "/api/roles", datos);
+        }
+        responder(respuesta, "/roles", request, response);
     }
 }

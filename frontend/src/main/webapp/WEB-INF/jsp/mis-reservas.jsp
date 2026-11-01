@@ -26,9 +26,26 @@
                             <td class="sx-texto-gris"><c:out value="${reserva.oficinaOrigen.zona}"/> → <c:out value="${reserva.oficinaDestino.zona}"/></td>
                             <td class="sx-derecha sx-negrita sx-sin-corte">$ <fmt:formatNumber value="${reserva.precioTotal}" minFractionDigits="2" maxFractionDigits="2"/></td>
                             <td>
-                                <span class="sx-etiqueta ${reserva.devuelto ? 'sx-etiqueta-ok' : 'sx-etiqueta-alerta'}">
-                                    ${reserva.devuelto ? 'Devuelto' : 'En curso'}
-                                </span>
+                                <c:choose>
+                                    <c:when test="${not empty reserva.fechaCancelacion}">
+                                        <span class="sx-etiqueta">Cancelada</span>
+                                    </c:when>
+                                    <c:when test="${reserva.devuelto}">
+                                        <span class="sx-etiqueta sx-etiqueta-ok">Devuelto</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="sx-acciones">
+                                            <span class="sx-etiqueta sx-etiqueta-alerta">En curso</span>
+                                            <%-- Cancelar solo si todavia no empezo (las fechas ISO se comparan como texto) --%>
+                                            <c:if test="${reserva.fechaDesde > hoy}">
+                                                <form action="${ctx}/mis-reservas/cancelar" method="POST" onsubmit="return confirm('¿Cancelar esta reserva?')">
+                                                    <input type="hidden" name="id" value="${reserva.id}">
+                                                    <button class="sx-btn sx-btn-chico sx-btn-peligro">Cancelar</button>
+                                                </form>
+                                            </c:if>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                         </tr>
                     </c:forEach>

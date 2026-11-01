@@ -8,6 +8,12 @@ public interface VehiculoRepositorio extends JpaRepository<Vehiculo, Long> {
 
     List<Vehiculo> findByFechaBajaIsNull();
 
+    long countByFechaBajaIsNull();
+
+    boolean existsByOficinaIdAndFechaBajaIsNull(Long oficinaId);
+
+    boolean existsByModeloId(Long modeloId);
+
     boolean existsByPatenteIgnoreCase(String patente);
 
     boolean existsByPatenteIgnoreCaseAndIdNot(String patente, Long id);

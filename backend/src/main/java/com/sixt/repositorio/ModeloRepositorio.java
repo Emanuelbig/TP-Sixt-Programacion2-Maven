@@ -8,4 +8,6 @@ public interface ModeloRepositorio extends JpaRepository<Modelo, Long> {
     boolean existsByMarcaIgnoreCaseAndNombreIgnoreCase(String marca, String nombre);
 
     boolean existsByMarcaIgnoreCaseAndNombreIgnoreCaseAndIdNot(String marca, String nombre, Long id);
+
+    boolean existsByTipoId(Long tipoId);
 }

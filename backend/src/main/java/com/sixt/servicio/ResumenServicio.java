@@ -20,9 +20,10 @@ public class ResumenServicio {
 
     public Map<String, Long> obtener() {
         return Map.of(
-                "oficinas", oficinaRepositorio.count(),
-                "vehiculos", vehiculoRepositorio.count(),
-                "personas", personaRepositorio.count(),
+                // Solo lo activo: lo dado de baja no aparece en las pantallas, tampoco en el resumen
+                "oficinas", oficinaRepositorio.countByFechaBajaIsNull(),
+                "vehiculos", vehiculoRepositorio.countByFechaBajaIsNull(),
+                "personas", personaRepositorio.countByFechaBajaIsNull(),
                 "reservas", reservaRepositorio.count());
     }
 }

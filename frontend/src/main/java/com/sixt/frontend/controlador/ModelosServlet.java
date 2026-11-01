@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 // Pestaña "Modelos" del catalogo: marca, nombre y tipo de cada modelo
-@WebServlet("/modelos")
+@WebServlet(urlPatterns = {"/modelos", "/modelos/baja"})
 public class ModelosServlet extends PantallaServlet {
 
     @Override
@@ -26,10 +26,15 @@ public class ModelosServlet extends PantallaServlet {
         return "modelos.jsp";
     }
 
-    // Con id es una edicion (PUT), sin id es un alta (POST)
+    // Eliminar (DELETE), edicion con id (PUT) o alta sin id (POST)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (request.getServletPath().equals("/modelos/baja")) {
+            responder(ClienteBackend.delete(request, "/api/modelos/" + request.getParameter("id")),
+                    "/modelos", request, response);
+            return;
+        }
         Map<String, Object> datos = Formulario.campos(request, "marca", "nombre", "tipoId");
         ClienteBackend.Respuesta respuesta = esEdicion(request)
                 ? ClienteBackend.put(request, "/api/modelos/" + request.getParameter("id"), datos)

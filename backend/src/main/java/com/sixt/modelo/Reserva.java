@@ -52,6 +52,9 @@ public class Reserva {
 
     private Boolean devuelto;
 
+    // Null = vigente. Si tiene fecha, se cancelo y el auto queda libre para esas fechas
+    private Instant fechaCancelacion;
+
     @Column(nullable = false)
     private LocalDate fechaDesde;
 

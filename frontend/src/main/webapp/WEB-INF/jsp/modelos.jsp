@@ -18,7 +18,16 @@
                                 <td><span class="sx-etiqueta"><c:out value="${modelo.tipo.nombre}"/></span></td>
                                 <%-- El precio viene del tipo: se cambia en la otra pestaña --%>
                                 <td class="sx-derecha sx-sin-corte">$ <fmt:formatNumber value="${modelo.tipo.precio}" minFractionDigits="2" maxFractionDigits="2"/></td>
-                                <td><a href="${ctx}/modelos?editar=${modelo.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a></td>
+                                <td>
+                                    <div class="sx-acciones">
+                                        <a href="${ctx}/modelos?editar=${modelo.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
+                                        <%-- Solo se puede si nadie lo usa: si no, el backend responde con el motivo --%>
+                                        <form action="${ctx}/modelos/baja" method="POST" onsubmit="return confirm('¿Eliminar este modelo?')">
+                                            <input type="hidden" name="id" value="${modelo.id}">
+                                            <button class="sx-btn sx-btn-chico sx-btn-peligro">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty modelos}">

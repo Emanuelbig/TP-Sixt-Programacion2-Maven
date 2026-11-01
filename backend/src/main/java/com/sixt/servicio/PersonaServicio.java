@@ -84,7 +84,7 @@ public class PersonaServicio {
     @Transactional
     public void darDeBaja(Long id) {
         Persona persona = buscarActiva(id);
-        if (reservaRepositorio.existsByClienteIdAndDevueltoFalse(id)) {
+        if (reservaRepositorio.existsByClienteIdAndDevueltoFalseAndFechaCancelacionIsNull(id)) {
             throw new ConflictoExcepcion(persona.getNombre() + " tiene reservas sin devolver, no se puede dar de baja");
         }
         persona.setFechaBaja(Instant.now());

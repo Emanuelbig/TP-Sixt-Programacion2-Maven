@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,4 +28,11 @@ public class Oficina {
 
     @Column(length = 500)
     private String direccion;
+
+    // Baja logica: null = activa. No se borra porque la usan reservas viejas
+    private Instant fechaBaja;
+
+    public boolean estaActiva() {
+        return fechaBaja == null;
+    }
 }

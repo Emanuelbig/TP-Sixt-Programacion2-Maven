@@ -21,7 +21,7 @@
                                 <td>
                                     <div class="sx-acciones">
                                         <a href="${ctx}/personas?editar=${persona.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
-                                        <form action="${ctx}/personas/baja" method="POST">
+                                        <form action="${ctx}/personas/baja" method="POST" onsubmit="return confirm('¿Dar de baja esta persona?')">
                                             <input type="hidden" name="id" value="${persona.id}">
                                             <button class="sx-btn sx-btn-chico sx-btn-peligro">Dar de baja</button>
                                         </form>

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 // Pestaña "Tipos y precios" del catalogo: el precio por dia de cada tipo (AUTO, CAMIONETA...)
-@WebServlet("/tipos")
+@WebServlet(urlPatterns = {"/tipos", "/tipos/baja"})
 public class TiposServlet extends PantallaServlet {
 
     @Override
@@ -25,10 +25,15 @@ public class TiposServlet extends PantallaServlet {
         return "tipos.jsp";
     }
 
-    // Con id es una edicion (PUT), sin id es un alta (POST)
+    // Eliminar (DELETE), edicion con id (PUT) o alta sin id (POST)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (request.getServletPath().equals("/tipos/baja")) {
+            responder(ClienteBackend.delete(request, "/api/tipos/" + request.getParameter("id")),
+                    "/tipos", request, response);
+            return;
+        }
         Map<String, Object> datos = Formulario.campos(request, "nombre", "precio");
         ClienteBackend.Respuesta respuesta = esEdicion(request)
                 ? ClienteBackend.put(request, "/api/tipos/" + request.getParameter("id"), datos)

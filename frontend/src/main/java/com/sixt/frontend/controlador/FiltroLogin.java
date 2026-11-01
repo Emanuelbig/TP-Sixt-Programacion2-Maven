@@ -21,18 +21,24 @@ public class FiltroLogin extends HttpFilter {
 
     private static final Map<String, String> PERMISO_POR_PANTALLA = Map.ofEntries(
             Map.entry("/oficinas", "ADMINISTRAR"),
+            Map.entry("/oficinas/baja", "ADMINISTRAR"),
             Map.entry("/vehiculos", "ADMINISTRAR"),
             Map.entry("/vehiculos/baja", "ADMINISTRAR"),
             Map.entry("/modelos", "ADMINISTRAR"),
+            Map.entry("/modelos/baja", "ADMINISTRAR"),
             Map.entry("/tipos", "ADMINISTRAR"),
+            Map.entry("/tipos/baja", "ADMINISTRAR"),
             Map.entry("/personas", "ADMINISTRAR"),
             Map.entry("/personas/baja", "ADMINISTRAR"),
             Map.entry("/roles", "ADMINISTRAR"),
+            Map.entry("/roles/baja", "ADMINISTRAR"),
             Map.entry("/clientes", "ADMINISTRAR_CLIENTES"),
             Map.entry("/clientes/baja", "ADMINISTRAR_CLIENTES"),
             Map.entry("/reservas", "VENDER"),
             Map.entry("/reservas/devolver", "VENDER"),
+            Map.entry("/reservas/cancelar", "VENDER"),
             Map.entry("/mis-reservas", "ALQUILAR"),
+            Map.entry("/mis-reservas/cancelar", "ALQUILAR"),
             Map.entry("/reservar", "ALQUILAR"));
 
     @Override

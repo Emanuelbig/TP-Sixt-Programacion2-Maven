@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet("/oficinas")
+@WebServlet(urlPatterns = {"/oficinas", "/oficinas/baja"})
 public class OficinasServlet extends PantallaServlet {
 
     @Override
@@ -24,10 +24,15 @@ public class OficinasServlet extends PantallaServlet {
         return "oficinas.jsp";
     }
 
-    // Con id es una edicion (PUT), sin id es un alta (POST)
+    // Baja (DELETE), edicion con id (PUT) o alta sin id (POST)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (request.getServletPath().equals("/oficinas/baja")) {
+            responder(ClienteBackend.delete(request, "/api/oficinas/" + request.getParameter("id")),
+                    "/oficinas", request, response);
+            return;
+        }
         Map<String, Object> datos = Formulario.campos(request, "zona", "direccion");
         ClienteBackend.Respuesta respuesta = esEdicion(request)
                 ? ClienteBackend.put(request, "/api/oficinas/" + request.getParameter("id"), datos)
