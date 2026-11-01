@@ -49,7 +49,7 @@ Usuarios de prueba (se crean solos la primera vez):
 | Email | Contraseña | Rol | Qué ve |
 |---|---|---|---|
 | `admin@sixt.com.ar` | `admin123` | ADMIN | Oficinas, vehículos, personas, roles y reservas |
-| `pepe@sixt.com.ar` | `vendedor123` | VENDEDOR | Reservas |
+| `pepe@sixt.com.ar` | `vendedor123` | VENDEDOR | Reservas y clientes |
 | `ema@gmail.com` | `cliente123` | CLIENTE | Mis reservas |
 
 Para apagar todo: `docker compose down`
@@ -137,7 +137,7 @@ En Java los campos van en **camelCase** (`fechaCreacion`) y en la base quedan en
 
 ## Pendientes
 
-- La API del backend no pide autenticación: confía en el frontend, que controla los permisos por pantalla. Para exponerla a otros clientes habría que agregar tokens (JWT).
+- Entrega al cliente y devolucion siguen representadas por el estado de devolucion; no hay entregas parciales.
 
 ## Reservas con varios vehiculos
 
@@ -187,3 +187,43 @@ Los cuerpos de `POST /api/personas` y `PUT /api/personas/{id}` deben incluir
 Hibernate agrega la columna al iniciar con `ddl-auto=update`; no hace falta una
 migracion manual para este campo. Los registros anteriores quedan con direccion
 vacia hasta completarla desde la edicion; no se inventan domicilios para ellos.
+
+## Gestion de clientes y sesiones de la API
+
+El permiso `ADMINISTRAR_CLIENTES` habilita el menu Clientes para vendedores y
+administradores. Personas y Roles siguen requiriendo `ADMINISTRAR`.
+El flujo Clientes permite listar, crear, editar y dar de baja exclusivamente personas
+con rol `CLIENTE` y solo permiso `ALQUILAR`. No modifica vendedores, administradores
+ni roles personalizados. Los formularios y DTO de clientes no incluyen `rolId`:
+el servidor asigna el rol al crear y lo conserva al editar. La baja sigue bloqueada
+si el cliente tiene reservas sin devolver.
+
+- `GET /api/clientes`: clientes activos.
+- `POST /api/clientes`: DNI, nombre, direccion, email, telefono y contrasenia inicial.
+- `PUT /api/clientes/{id}`: DNI, nombre, direccion, email y telefono.
+- `DELETE /api/clientes/{id}`: baja logica.
+
+Las rutas de la API requieren una sesion autenticada, excepto `POST /api/login`.
+El login devuelve los datos del usuario y una cookie HTTP-only `SIXT_API_SESSION`.
+`GET /api/sesion` devuelve la identidad y permisos actuales; `POST /api/logout`
+invalida la sesion. Para probar con un cliente HTTP, conservar la cookie del login
+y enviarla en las consultas posteriores. No se aceptan identificadores de usuario
+como reemplazo de la autenticacion.
+
+El frontend conserva la cookie de la API en su propia sesion del servidor y la envia
+solo en solicitudes de ese usuario. Los permisos y el estado activo se verifican
+contra la base en cada solicitud. El cliente consulta solo sus reservas y cambia
+solo su propia contrasenia; el vendedor registrado en una reserva es el usuario
+que realiza la operacion. Las consultas de vehiculos/modelos/oficinas usadas por
+Reservas siguen disponibles para vendedores.
+
+Al iniciar se agrega el nuevo permiso a los roles iniciales `ADMIN` y `VENDEDOR`,
+tambien en una base existente, sin borrar personas ni reservas. Los roles
+personalizados se mantienen: si deben gestionar clientes, asignarles ese permiso
+al crearlos. Los permisos se almacenan como texto `VARCHAR(64)`, manteniendo
+`EnumType.STRING` en Java. Para una base anterior que todavia tenga un `ENUM`
+nativo de MySQL, ejecutar una vez [docs/migracion-permisos-varchar.sql](docs/migracion-permisos-varchar.sql)
+con el backend detenido, antes de actualizar. `ddl-auto=update` no garantiza
+ampliar los valores de un ENUM existente.
+Reconstruir con `docker compose up -d --build` y volver a iniciar sesion.
+No hace falta reiniciar ni eliminar el volumen de MySQL.
