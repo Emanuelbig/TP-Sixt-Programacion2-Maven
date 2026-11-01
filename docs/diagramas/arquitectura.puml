@@ -1,0 +1,118 @@
+@startuml arquitectura
+' Arquitectura en capas: dos proyectos (frontend y backend) que se hablan por HTTP + JSON.
+' Se muestran las clases de cada capa y las dependencias principales (el recorrido de una reserva).
+title Sixt - Arquitectura en capas
+
+' Permite mezclar clases con actor y base de datos en el mismo diagrama
+allowmixing
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1A1A1A
+  ArrowColor #1A1A1A
+  HeaderBackgroundColor #F4F5F6
+}
+hide empty members
+
+package "FRONTEND (Tomcat :8081) - Servlets + JSP" as front {
+  class FiltroLogin <<WebFilter>> {
+    permisos por pantalla
+  }
+  abstract class PantallaServlet <<Template Method>> {
+    # {abstract} cargarDatos(request)
+    # {abstract} vista() : String
+    # doGet(request, response)
+    # responder(respuesta, redireccion, ...)
+  }
+  class ReservasServlet
+  class ReservarServlet
+  class "OficinasServlet\nVehiculosServlet\nModelosServlet\nTiposServlet\nPersonasServlet\nClientesServlet\nRolesServlet\nMisReservasServlet\nMiCuentaServlet" as otrosServlets
+  class BuscadorReserva {
+    cargar(request)
+    datos(request) : Map
+  }
+  class ClienteBackend <<HttpClient + JSON>> {
+    getLista(ruta) / post / put / patch / delete
+  }
+  class "JSP (vistas)" as jsp
+
+  PantallaServlet <|-- ReservasServlet
+  PantallaServlet <|-- ReservarServlet
+  PantallaServlet <|-- otrosServlets
+  ReservasServlet --> BuscadorReserva
+  ReservarServlet --> BuscadorReserva
+  PantallaServlet ..> jsp : forward
+  PantallaServlet --> ClienteBackend
+}
+
+package "BACKEND (Spring Boot :8000) - API REST" as back {
+  package "configuracion" {
+    class AutorizacionApi <<filtro>> {
+      sesion + permisos por ruta
+    }
+    class CargaDatosIniciales
+    class ConfiguracionSeguridad {
+      PasswordEncoder (BCrypt)
+    }
+  }
+  package "controlador (@RestController)" {
+    class ReservaControlador
+    class "VehiculoControlador\nModeloControlador\nOficinaControlador\nPersonaControlador\nClienteControlador\nRolControlador\nLoginControlador\nSesionControlador\nResumenControlador" as otrosControladores
+  }
+  package "dto (records)" {
+    class NuevaReserva
+    class "DatosVehiculo, DatosModelo,\nDatosTipoModelo, DatosOficina,\nNuevaPersona, NuevoRol, ..." as otrosDto
+  }
+  package "servicio (@Service) - reglas de negocio" {
+    class ReservaServicio {
+      crear(datos) / cancelar(id) / devolver(id)
+    }
+    class "VehiculoServicio\nModeloServicio\nOficinaServicio\nPersonaServicio\nClienteServicio\nRolServicio\nAutenticacionServicio\nResumenServicio" as otrosServicios
+    interface CalculadoraPrecio <<Strategy>> {
+      calcular(vehiculo, desde, hasta) : BigDecimal
+    }
+    class PrecioPorDia
+  }
+  package "repositorio (Spring Data JPA)" {
+    interface ReservaRepositorio <<JpaRepository>> {
+      vehiculoOcupadoEntre(...)
+    }
+    interface "VehiculoRepositorio\nModeloRepositorio\nTipoModeloRepositorio\nOficinaRepositorio\nPersonaRepositorio\nRolRepositorio" as otrosRepositorios <<JpaRepository>>
+  }
+  package "excepcion" {
+    class ManejadorDeErrores <<@RestControllerAdvice>> {
+      excepcion -> 400 / 401 / 403 / 404 / 409
+    }
+    class "DatosInvalidosExcepcion\nConflictoExcepcion\nRecursoNoEncontradoExcepcion\nAccesoDenegadoExcepcion\nCredencialesInvalidasExcepcion" as excepciones
+  }
+  package "modelo (@Entity)" {
+    class "Reserva, DetalleReserva, Vehiculo,\nModelo, TipoModelo, Oficina,\nPersona, Rol, Permiso" as entidades
+  }
+
+  AutorizacionApi ..> ReservaControlador : deja pasar\nsi tiene permiso
+  ReservaControlador --> ReservaServicio
+  ReservaControlador ..> NuevaReserva : recibe
+  otrosControladores --> otrosServicios
+  ReservaServicio --> CalculadoraPrecio
+  CalculadoraPrecio <|.. PrecioPorDia
+  ReservaServicio --> ReservaRepositorio
+  ReservaServicio --> otrosServicios : Vehiculo, Persona,\nOficina
+  otrosServicios --> otrosRepositorios
+  ReservaServicio ..> excepciones : lanza
+  ManejadorDeErrores ..> excepciones : traduce a HTTP
+  ReservaRepositorio ..> entidades
+  otrosRepositorios ..> entidades
+}
+
+database "MySQL :3306\n(base sixt)" as mysql
+
+actor Navegador
+Navegador --> FiltroLogin : HTTP (HTML)
+FiltroLogin --> PantallaServlet
+ClienteBackend --> AutorizacionApi : HTTP + JSON\n/api/...
+ReservaRepositorio --> mysql : SQL (Hibernate)
+otrosRepositorios --> mysql
+@enduml

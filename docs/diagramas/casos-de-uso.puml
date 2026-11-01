@@ -1,0 +1,94 @@
+@startuml casos-de-uso
+' Casos de uso por actor. Que puede hacer cada uno lo deciden los permisos de su rol:
+' ADMINISTRAR (Administrador), VENDER + ADMINISTRAR_CLIENTES (Vendedor), ALQUILAR (Cliente).
+title Sixt - Diagrama de casos de uso
+
+left to right direction
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #1A1A1A
+  ArrowColor #1A1A1A
+}
+skinparam package {
+  BorderColor #656A6F
+}
+
+actor "Usuario" as usuario
+actor "Administrador" as admin
+actor "Vendedor" as vendedor
+actor "Cliente" as cliente
+
+' Los tres son usuarios: heredan lo comun
+usuario <|-- admin
+usuario <|-- vendedor
+usuario <|-- cliente
+
+rectangle "Sistema Sixt" {
+  package "Comun" {
+    usecase "Iniciar sesion" as UC1
+    usecase "Cerrar sesion" as UC2
+    usecase "Ver mis datos" as UC3
+    usecase "Cambiar contrasenia" as UC4
+  }
+
+  package "Administracion" {
+    usecase "Gestionar oficinas\n(alta, edicion, baja)" as UC10
+    usecase "Gestionar vehiculos\n(alta, edicion, baja)" as UC11
+    usecase "Gestionar catalogo:\nmodelos y tipos" as UC12
+    usecase "Cambiar precio por dia\nde un tipo" as UC13
+    usecase "Gestionar personas\n(alta, edicion, baja)" as UC14
+    usecase "Gestionar roles\ny sus permisos" as UC15
+    usecase "Ver resumen del sistema" as UC16
+  }
+
+  package "Ventas" {
+    usecase "Gestionar clientes\n(alta, edicion, baja)" as UC20
+    usecase "Crear reserva\npara un cliente" as UC21
+    usecase "Marcar reserva\ncomo devuelta" as UC22
+    usecase "Cancelar reserva" as UC23
+    usecase "Ver todas las reservas" as UC24
+  }
+
+  package "Alquiler" {
+    usecase "Reservar un auto\n(reserva online)" as UC30
+    usecase "Ver mis reservas" as UC31
+    usecase "Cancelar mi reserva" as UC32
+  }
+
+  usecase "Buscar vehiculos disponibles\npor fechas y oficinas" as UC40
+}
+
+usuario --> UC1
+usuario --> UC2
+usuario --> UC3
+usuario --> UC4
+
+admin --> UC10
+admin --> UC11
+admin --> UC12
+admin --> UC14
+admin --> UC15
+admin --> UC16
+UC13 .> UC12 : <<extend>>
+
+vendedor --> UC20
+vendedor --> UC21
+vendedor --> UC22
+vendedor --> UC23
+vendedor --> UC24
+vendedor --> UC16
+
+cliente --> UC30
+cliente --> UC31
+cliente --> UC32
+
+UC21 ..> UC40 : <<include>>
+UC30 ..> UC40 : <<include>>
+
+note bottom of UC23
+  Solo si la reserva no fue devuelta
+  y todavia no empezo.
+end note
+@enduml

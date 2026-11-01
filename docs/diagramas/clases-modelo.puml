@@ -1,0 +1,128 @@
+@startuml clases-modelo
+' Diagrama de clases del modelo (paquete com.sixt.modelo).
+' Cada clase es una @Entity de JPA: se guarda como una tabla en MySQL.
+title Sixt - Diagrama de clases del modelo
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1A1A1A
+  ArrowColor #1A1A1A
+  HeaderBackgroundColor #F4F5F6
+}
+hide empty members
+
+class Persona {
+  - id : Long
+  - dni : int
+  - nombre : String
+  - direccion : String
+  - email : String
+  - telefono : String
+  - contrasenia : String  <<hash BCrypt>>
+  - fechaCreacion : Instant
+  - fechaBaja : Instant  <<null = activa>>
+  --
+  + estaActiva() : boolean
+  + puede(permiso : Permiso) : boolean
+}
+
+class Rol {
+  - id : Long
+  - nombre : String
+  - permisos : Set<Permiso>
+  --
+  + tiene(permiso : Permiso) : boolean
+}
+
+enum Permiso {
+  ADMINISTRAR
+  ADMINISTRAR_CLIENTES
+  ALQUILAR
+  VENDER
+  --
+  - descripcion : String
+}
+
+class Oficina {
+  - id : Long
+  - zona : String
+  - direccion : String
+  - fechaBaja : Instant  <<null = activa>>
+  --
+  + estaActiva() : boolean
+}
+
+class TipoModelo {
+  - id : Long
+  - nombre : String
+  - precio : BigDecimal  <<por dia>>
+}
+
+class Modelo {
+  - id : Long
+  - marca : String
+  - nombre : String
+}
+
+class Vehiculo {
+  - id : Long
+  - patente : String
+  - color : String
+  - anio : int
+  - fechaCreacion : Instant
+  - fechaBaja : Instant  <<null = activo>>
+  --
+  + estaActivo() : boolean
+}
+
+class Reserva {
+  - id : Long
+  - fechaDesde : LocalDate
+  - fechaHasta : LocalDate
+  - precioTotal : BigDecimal
+  - devuelto : Boolean
+  - fechaCancelacion : Instant  <<null = vigente>>
+  - fechaCreacion : Instant
+  --
+  + agregarDetalle(detalle : DetalleReserva) : void
+}
+
+class DetalleReserva {
+  - id : Long
+  - patente : String  <<copia>>
+  - color : String  <<copia>>
+  - anio : int  <<copia>>
+  - litrosNafta : int
+  - precioAlquiler : BigDecimal  <<precio al reservar>>
+}
+
+' --- Relaciones (multiplicidades leidas desde la clase que tiene la flecha) ---
+Persona "*" --> "1" Rol : rol
+Rol "1" *-- "1..*" Permiso : permisos
+
+Modelo "*" --> "1" TipoModelo : tipo
+Vehiculo "*" --> "1" Modelo : modelo
+Vehiculo "*" --> "1" Oficina : oficina  (donde esta hoy)
+
+Reserva "*" --> "1" Persona : cliente
+Reserva "*" --> "0..1" Persona : vendedor  (null = reserva online)
+Reserva "*" --> "1" Oficina : oficinaOrigen
+Reserva "*" --> "1" Oficina : oficinaDestino
+Reserva "1" *-- "1..*" DetalleReserva : detalles
+DetalleReserva "*" --> "1" Vehiculo : vehiculo
+
+note right of DetalleReserva
+  Guarda una copia de los datos del auto y el precio
+  del momento: si despues cambia el precio del tipo
+  o se edita el vehiculo, la reserva no se altera.
+end note
+
+note bottom of Rol
+  Los roles son datos, no clases: un rol nuevo
+  (ej. SYSADMIN) se crea desde la pantalla Roles
+  eligiendo permisos, sin tocar codigo (principio abierto/cerrado).
+end note
+@enduml

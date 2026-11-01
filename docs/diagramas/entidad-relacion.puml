@@ -1,0 +1,121 @@
+@startuml entidad-relacion
+' Diagrama entidad-relacion de la base MySQL "sixt".
+' Las tablas las crea Hibernate a partir de las entidades (ddl-auto=update).
+' PK = clave primaria, FK = clave foranea, UK = unica.
+title Sixt - Diagrama entidad-relacion (MySQL)
+
+hide circle
+hide empty members
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1A1A1A
+  ArrowColor #1A1A1A
+  HeaderBackgroundColor #F4F5F6
+}
+
+entity "rol" as rol {
+  * id : BIGINT <<PK>>
+  --
+  * nombre : VARCHAR(255) <<UK>>
+}
+
+entity "rol_permiso" as rol_permiso {
+  * rol_id : BIGINT <<FK>>
+  permiso : VARCHAR(64)
+  --
+  UK (rol_id, permiso)
+}
+
+entity "persona" as persona {
+  * id : BIGINT <<PK>>
+  --
+  * dni : INT <<UK>>
+  * email : VARCHAR(255) <<UK>>
+  * contrasenia : VARCHAR(255)
+  nombre : VARCHAR(255)
+  direccion : VARCHAR(500)
+  telefono : VARCHAR(255)
+  fecha_creacion : DATETIME
+  fecha_baja : DATETIME
+  * rol_id : BIGINT <<FK>>
+}
+
+entity "oficina" as oficina {
+  * id : BIGINT <<PK>>
+  --
+  zona : VARCHAR(255)
+  direccion : VARCHAR(500)
+  fecha_baja : DATETIME
+}
+
+entity "tipo_modelo" as tipo_modelo {
+  * id : BIGINT <<PK>>
+  --
+  nombre : VARCHAR(255)
+  precio : DECIMAL(12,2)
+}
+
+entity "modelo" as modelo {
+  * id : BIGINT <<PK>>
+  --
+  marca : VARCHAR(255)
+  nombre : VARCHAR(255)
+  * tipo_id : BIGINT <<FK>>
+}
+
+entity "vehiculo" as vehiculo {
+  * id : BIGINT <<PK>>
+  --
+  * patente : VARCHAR(255) <<UK>>
+  color : VARCHAR(255)
+  * anio : INT
+  fecha_creacion : DATETIME
+  fecha_baja : DATETIME
+  * modelo_id : BIGINT <<FK>>
+  * oficina_id : BIGINT <<FK>>
+}
+
+entity "reserva" as reserva {
+  * id : BIGINT <<PK>>
+  --
+  * fecha_desde : DATE
+  * fecha_hasta : DATE
+  precio_total : DECIMAL(12,2)
+  devuelto : BIT
+  fecha_cancelacion : DATETIME
+  fecha_creacion : DATETIME
+  * cliente_id : BIGINT <<FK>>
+  vendedor_id : BIGINT <<FK>> (NULL = online)
+  * oficina_origen_id : BIGINT <<FK>>
+  * oficina_destino_id : BIGINT <<FK>>
+}
+
+entity "detalle_reserva" as detalle_reserva {
+  * id : BIGINT <<PK>>
+  --
+  * reserva_id : BIGINT <<FK>>
+  * vehiculo_id : BIGINT <<FK>>
+  patente : VARCHAR(255)
+  color : VARCHAR(255)
+  * anio : INT
+  * litros_nafta : INT
+  * precio_alquiler : DECIMAL(12,2)
+  --
+  UK (reserva_id, vehiculo_id)
+}
+
+' Notacion pata de gallo: ||  uno exacto, o| cero o uno, |{ uno o muchos, o{ cero o muchos
+rol ||--o{ rol_permiso
+rol ||--o{ persona
+persona ||--o{ reserva : cliente
+persona |o--o{ reserva : vendedor
+oficina ||--o{ reserva : origen
+oficina ||--o{ reserva : destino
+oficina ||--o{ vehiculo
+tipo_modelo ||--o{ modelo
+modelo ||--o{ vehiculo
+reserva ||--|{ detalle_reserva
+vehiculo ||--o{ detalle_reserva
+@enduml

@@ -227,3 +227,20 @@ con el backend detenido, antes de actualizar. `ddl-auto=update` no garantiza
 ampliar los valores de un ENUM existente.
 Reconstruir con `docker compose up -d --build` y volver a iniciar sesion.
 No hace falta reiniciar ni eliminar el volumen de MySQL.
+
+## Diagramas
+
+En `docs/diagramas/` están el código fuente (PlantUML, `.puml`) y la imagen (`.png`) de cada uno:
+
+| Diagrama | Archivo |
+|---|---|
+| Clases del modelo | [clases-modelo.png](docs/diagramas/clases-modelo.png) |
+| Arquitectura en capas | [arquitectura.png](docs/diagramas/arquitectura.png) |
+| Entidad-relación (MySQL) | [entidad-relacion.png](docs/diagramas/entidad-relacion.png) |
+| Casos de uso | [casos-de-uso.png](docs/diagramas/casos-de-uso.png) |
+
+Para regenerar las imágenes después de editar un `.puml` (desde la carpeta `docs/diagramas`):
+
+```bash
+docker run --rm -v "$(pwd):/data" -w /data plantuml/plantuml -tpng -charset UTF-8 *.puml
+```
