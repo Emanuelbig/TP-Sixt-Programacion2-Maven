@@ -11,6 +11,9 @@ public class MisReservasServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
+        if (request.getParameter("ok") != null) {
+            request.setAttribute("mensaje", "¡Listo! Tu reserva quedó confirmada");
+        }
         Object id = UsuarioEnSesion.id(request);
         request.setAttribute("reservas", ClienteBackend.getLista(request, "/api/reservas?clienteId=" + id));
     }

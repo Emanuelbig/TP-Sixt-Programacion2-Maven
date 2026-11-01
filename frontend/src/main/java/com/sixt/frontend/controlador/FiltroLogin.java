@@ -23,6 +23,8 @@ public class FiltroLogin extends HttpFilter {
             Map.entry("/oficinas", "ADMINISTRAR"),
             Map.entry("/vehiculos", "ADMINISTRAR"),
             Map.entry("/vehiculos/baja", "ADMINISTRAR"),
+            Map.entry("/modelos", "ADMINISTRAR"),
+            Map.entry("/tipos", "ADMINISTRAR"),
             Map.entry("/personas", "ADMINISTRAR"),
             Map.entry("/personas/baja", "ADMINISTRAR"),
             Map.entry("/roles", "ADMINISTRAR"),
@@ -30,13 +32,15 @@ public class FiltroLogin extends HttpFilter {
             Map.entry("/clientes/baja", "ADMINISTRAR_CLIENTES"),
             Map.entry("/reservas", "VENDER"),
             Map.entry("/reservas/devolver", "VENDER"),
-            Map.entry("/mis-reservas", "ALQUILAR"));
+            Map.entry("/mis-reservas", "ALQUILAR"),
+            Map.entry("/reservar", "ALQUILAR"));
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         String ruta = request.getServletPath();
-        if (ruta.equals("/login")) {
+        // El login y los estilos se ven sin sesion (si no, la pantalla de login quedaria sin CSS)
+        if (ruta.equals("/login") || ruta.startsWith("/css/")) {
             chain.doFilter(request, response);
             return;
         }

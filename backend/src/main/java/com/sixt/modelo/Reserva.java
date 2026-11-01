@@ -62,8 +62,9 @@ public class Reserva {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Persona cliente;
 
+    // Null cuando el cliente reservo solo desde la web (reserva online, sin vendedor)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vendedor_id", nullable = false)
+    @JoinColumn(name = "vendedor_id")
     private Persona vendedor;
 
     @ManyToOne(fetch = FetchType.LAZY)

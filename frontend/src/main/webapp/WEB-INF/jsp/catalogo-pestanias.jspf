@@ -1,0 +1,5 @@
+<%-- Pestañas del catalogo (chips como en sixt.com.ar). La activa va en negro --%>
+<nav class="sx-pestanias">
+    <a href="${ctx}/modelos" class="sx-chip ${ruta == '/modelos' ? 'sx-chip-activo' : ''}">Modelos</a>
+    <a href="${ctx}/tipos" class="sx-chip ${ruta == '/tipos' ? 'sx-chip-activo' : ''}">Tipos y precios</a>
+</nav>

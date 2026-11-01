@@ -11,7 +11,7 @@ public record NuevaReserva(
         @NotNull(message = "El cliente es obligatorio")
         Long clienteId,
 
-        @NotNull(message = "El vendedor es obligatorio")
+        // Null si reserva el propio cliente. Quien puede mandarlo lo controla ReservaControlador
         Long vendedorId,
 
         @NotNull(message = "La oficina de origen es obligatoria")

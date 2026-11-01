@@ -7,19 +7,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
+// Pantalla del vendedor: todas las reservas + reservar para cualquier cliente
 @WebServlet(urlPatterns = {"/reservas", "/reservas/devolver"})
 public class ReservasServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
+        if (request.getParameter("ok") != null) {
+            request.setAttribute("mensaje", "La reserva se creó correctamente");
+        }
         request.setAttribute("reservas", ClienteBackend.getLista(request, "/api/reservas"));
         request.setAttribute("personas", ClienteBackend.getLista(request, "/api/clientes"));
-        request.setAttribute("vehiculos", ClienteBackend.getLista(request, "/api/vehiculos"));
-        request.setAttribute("oficinas", ClienteBackend.getLista(request, "/api/oficinas"));
+        BuscadorReserva.cargar(request);
     }
 
     @Override
@@ -30,25 +30,16 @@ public class ReservasServlet extends PantallaServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        ClienteBackend.Respuesta respuesta;
-
         if (request.getServletPath().equals("/reservas/devolver")) {
-            respuesta = ClienteBackend.post(request, "/api/reservas/" + request.getParameter("id") + "/devolver", Map.of());
-        } else {
-            Map<String, Object> datos = Formulario.campos(request,
-                    "clienteId", "vendedorId", "oficinaOrigenId", "oficinaDestinoId",
-                    "fechaDesde", "fechaHasta");
-            List<Map<String, Object>> detalles = new ArrayList<>();
-            for (String vehiculoId : Formulario.lista(request, "vehiculoId")) {
-                String litros = request.getParameter("litrosNafta_" + vehiculoId);
-                Map<String, Object> detalle = new LinkedHashMap<>();
-                detalle.put("vehiculoId", vehiculoId);
-                detalle.put("litrosNafta", litros == null || litros.isBlank() ? null : litros.trim());
-                detalles.add(detalle);
-            }
-            datos.put("detalles", detalles);
-            respuesta = ClienteBackend.post(request, "/api/reservas", datos);
+            ClienteBackend.Respuesta respuesta = ClienteBackend.post(request,
+                    "/api/reservas/" + request.getParameter("id") + "/devolver", Map.of());
+            responder(respuesta, "/reservas", request, response);
+            return;
         }
-        responder(respuesta, "/reservas", request, response);
+        Map<String, Object> datos = BuscadorReserva.datos(request);
+        datos.put("clienteId", request.getParameter("clienteId"));
+        // El vendedor es siempre quien inicio sesion: no viaja en el formulario, asi no se puede falsificar
+        datos.put("vendedorId", UsuarioEnSesion.id(request));
+        responder(ClienteBackend.post(request, "/api/reservas", datos), "/reservas?ok", request, response);
     }
 }

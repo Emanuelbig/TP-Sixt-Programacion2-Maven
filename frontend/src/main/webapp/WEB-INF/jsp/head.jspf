@@ -1,0 +1,22 @@
+<%-- Comienzo comun de TODAS las paginas (incluido el login): taglibs, variables y <head> --%>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@taglib prefix="c"  uri="jakarta.tags.core" %>
+<%@taglib prefix="fn"  uri="jakarta.tags.functions" %>
+<%@taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%-- Formato argentino para precios ($ 30.000,50), sin depender del idioma del navegador --%>
+<fmt:setLocale value="es_AR" />
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="usuario" value="${sessionScope.usuario}" />
+<%-- Ruta del servlet que mostro esta pagina (ej: "/vehiculos"), para marcar el link activo del menu --%>
+<c:set var="ruta" value="${requestScope['jakarta.servlet.forward.servlet_path']}" />
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sixt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@700;900&display=swap" rel="stylesheet">
+    <%-- Unico archivo de estilos del sistema (sin frameworks) --%>
+    <link href="${ctx}/css/sixt.css" rel="stylesheet">
+</head>

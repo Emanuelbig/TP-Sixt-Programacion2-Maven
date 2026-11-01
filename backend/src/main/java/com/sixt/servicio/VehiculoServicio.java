@@ -4,13 +4,14 @@ import com.sixt.dto.DatosVehiculo;
 import com.sixt.excepcion.ConflictoExcepcion;
 import com.sixt.excepcion.DatosInvalidosExcepcion;
 import com.sixt.excepcion.RecursoNoEncontradoExcepcion;
-import com.sixt.modelo.Modelo;
 import com.sixt.modelo.Vehiculo;
 import com.sixt.repositorio.ModeloRepositorio;
 import com.sixt.repositorio.ReservaRepositorio;
 import com.sixt.repositorio.VehiculoRepositorio;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,18 @@ public class VehiculoServicio {
         return vehiculoRepositorio.findByFechaBajaIsNull();
     }
 
-    public List<Modelo> listarModelos() {
-        return modeloRepositorio.findAll();
+    // Recorre los activos y se queda con los que no estan reservados en ese rango
+    public List<Vehiculo> listarDisponibles(LocalDate desde, LocalDate hasta) {
+        if (hasta.isBefore(desde)) {
+            throw new DatosInvalidosExcepcion("La fecha de fin no puede ser anterior a la de inicio");
+        }
+        List<Vehiculo> disponibles = new ArrayList<>();
+        for (Vehiculo vehiculo : listar()) {
+            if (!reservaRepositorio.vehiculoOcupadoEntre(vehiculo.getId(), desde, hasta)) {
+                disponibles.add(vehiculo);
+            }
+        }
+        return disponibles;
     }
 
     public Vehiculo buscar(Long id) {

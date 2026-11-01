@@ -1,58 +1,48 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%@taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sixt | Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+<%@include file="head.jspf" %>
+<body>
 
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <span class="navbar-brand mb-0 h1">🚗 Sixt</span>
+    <%-- Header sin menu: todavia no hay nadie logueado --%>
+    <header class="sx-header">
+        <div class="sx-contenedor">
+            <span class="sx-logo">SIXT</span>
         </div>
-    </nav>
+    </header>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
+    <%-- Seccion negra: titulo a la izquierda, card blanca con el formulario a la derecha --%>
+    <section class="sx-seccion sx-seccion-negra">
+        <div class="sx-contenedor sx-login">
+            <div>
+                <h1 class="sx-display">Alquilá tu próximo auto</h1>
+                <p class="sx-subtitulo">Sistema de reservas para clientes, vendedores y administradores.</p>
+            </div>
 
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Ingresar</h5>
+            <div class="sx-buscador">
+                <h2 class="sx-h3">Ingresar</h2>
+                <form action="${ctx}/login" method="POST">
+                    <div class="sx-campo">
+                        <label for="email" class="sx-label">Email</label>
+                        <input id="email" name="email" type="email" class="sx-input" placeholder="admin@sixt.com.ar" required>
                     </div>
-                    <div class="card-body">
-                        <form action="${pageContext.request.contextPath}/login" method="POST">
-                            <div class="mb-3">
-                                <label for="email" class="form-label fw-semibold">Email</label>
-                                <input id="email" name="email" type="email" class="form-control" placeholder="admin@sixt.com.ar" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="contrasenia" class="form-label fw-semibold">Contraseña</label>
-                                <input id="contrasenia" name="contrasenia" type="password" class="form-control" placeholder="••••••" required>
-                            </div>
-
-                            <c:if test="${not empty error}">
-                                <div class="alert alert-danger py-2">${error}</div>
-                            </c:if>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Ingresar</button>
-                            </div>
-                        </form>
+                    <div class="sx-campo">
+                        <label for="contrasenia" class="sx-label">Contraseña</label>
+                        <input id="contrasenia" name="contrasenia" type="password" class="sx-input" placeholder="••••••" required>
                     </div>
-                </div>
 
-                <p class="text-center text-muted mt-4 small">
-                    Programación II &middot; Trabajo Práctico Sixt
-                </p>
+                    <c:if test="${not empty error}">
+                        <div class="sx-mensaje sx-mensaje-error"><c:out value="${error}"/></div>
+                    </c:if>
 
+                    <%-- El unico boton naranja de la pantalla: la accion principal --%>
+                    <button type="submit" class="sx-btn sx-btn-ancho">Ingresar</button>
+                </form>
             </div>
         </div>
-    </div>
+    </section>
 
-</body>
-</html>
+    <main class="sx-contenedor sx-principal">
+        <h2 class="sx-h2">Cómo funciona</h2>
+        <p class="sx-texto-gris">Cada persona entra con su email y ve solo las pantallas que su rol permite:
+            el administrador gestiona oficinas, vehículos y personas; el vendedor carga reservas y clientes;
+            el cliente consulta sus alquileres.</p>
+
+<%@include file="footer.jspf" %>

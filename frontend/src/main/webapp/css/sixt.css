@@ -1,0 +1,432 @@
+/* Estilos tipo Sixt para el TP de alquiler de autos (relevado de sixt.com.ar) */
+
+:root {
+    --sx-naranja: #FF5000;
+    --sx-naranja-suave: #FFF2E8;
+    --sx-negro: #1A1A1A;
+    --sx-gris-texto: #656A6F;
+    --sx-gris-placeholder: #8D9299;
+    --sx-borde: #D7DADC;
+    --sx-fondo: #FFFFFF;
+    --sx-fondo-suave: #F4F5F6;
+    --sx-fondo-seccion: #E9EBEE;
+    --sx-ok: #22C55E;
+    --sx-ok-oscuro: #17783C;
+    --sx-ok-suave: #EAFFEC;
+    --sx-error: #D70015;
+    --sx-error-suave: #FFF5F6;
+    --sx-alerta: #FFBC1F;
+    --sx-info: #1658C7;
+    --sx-hover: rgba(25, 25, 25, 0.04);
+    --sx-pressed: rgba(25, 25, 25, 0.08);
+
+    --sx-radio: 12px;
+    --sx-sombra: 0 12px 40px rgba(0, 0, 0, 0.10), 0 8px 32px rgba(0, 0, 0, 0.08);
+
+    --sx-fuente: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --sx-fuente-titulo: "Roboto Condensed", "Roboto", Helvetica, Arial, sans-serif;
+}
+
+/* Base */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: var(--sx-fuente);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--sx-negro);
+    background: var(--sx-fondo);
+}
+
+a { color: inherit; }
+
+.sx-contenedor {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Títulos */
+.sx-display, .sx-h2, .sx-h3 {
+    font-family: var(--sx-fuente-titulo);
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    margin: 0 0 16px;
+}
+.sx-display { font-size: 48px; letter-spacing: 0.03em; }
+.sx-h2 { font-size: 40px; letter-spacing: 0.03em; }
+.sx-h3 { font-size: 28px; letter-spacing: 0.036em; }
+.sx-subtitulo { font-size: 20px; font-weight: 700; line-height: 1.2; margin: 0 0 8px; }
+.sx-texto-gris { color: var(--sx-gris-texto); }
+.sx-chico { font-size: 12px; color: var(--sx-gris-texto); }
+
+/* Header */
+.sx-header {
+    background: var(--sx-negro);
+    color: #fff;
+    height: 64px;
+}
+.sx-header .sx-contenedor {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.sx-logo {
+    font-family: var(--sx-fuente-titulo);
+    font-weight: 900;
+    font-size: 32px;
+    letter-spacing: 0.02em;
+    color: #fff;
+    text-decoration: none;
+}
+.sx-nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    margin-left: 24px;
+}
+.sx-nav a:hover { color: var(--sx-naranja); }
+
+/* Secciones */
+.sx-seccion { padding: 72px 0; }
+.sx-seccion-gris { background: var(--sx-fondo-seccion); }
+.sx-seccion-negra { background: var(--sx-negro); color: #fff; }
+
+/* Botones */
+.sx-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    padding: 0 40px;
+    border: none;
+    border-radius: var(--sx-radio);
+    font-family: var(--sx-fuente);
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    background: var(--sx-naranja);
+    color: #fff;
+}
+.sx-btn:hover { filter: brightness(0.92); }
+.sx-btn-oscuro { background: var(--sx-negro); color: #fff; }
+.sx-btn-claro { background: var(--sx-fondo-suave); color: var(--sx-negro); }
+.sx-btn-fantasma {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    height: 36px;
+    padding: 0 24px;
+}
+.sx-btn-chico { height: 36px; padding: 0 16px; font-size: 14px; }
+
+/* Chips tipo "Coches / Furgonetas" */
+.sx-chip {
+    display: inline-flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: var(--sx-fondo-suave);
+    color: var(--sx-negro);
+    text-decoration: none;
+}
+.sx-chip-activo { background: var(--sx-negro); color: #fff; }
+
+/* Formularios */
+.sx-campo { margin-bottom: 16px; }
+.sx-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.sx-input, .sx-select {
+    width: 100%;
+    height: 56px;
+    padding: 0 12px;
+    border: 1px solid var(--sx-borde);
+    border-radius: var(--sx-radio);
+    background: #fff;
+    font-family: var(--sx-fuente);
+    font-size: 16px;
+    color: var(--sx-negro);
+}
+.sx-input::placeholder { color: var(--sx-gris-placeholder); }
+.sx-input:focus, .sx-select:focus {
+    outline: none;
+    border: 2px solid var(--sx-naranja);
+}
+
+/* Buscador del hero */
+.sx-buscador {
+    background: #fff;
+    color: var(--sx-negro);   /* agregado: si esta sobre una seccion negra, no hereda el texto blanco */
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--sx-sombra);
+}
+
+/* Cards */
+.sx-grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+.sx-card {
+    background: #fff;
+    border-radius: var(--sx-radio);
+    overflow: hidden;
+}
+.sx-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+.sx-card-cuerpo { padding: 20px; }
+
+/* Tablas para los listados */
+.sx-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: var(--sx-radio);
+    overflow: hidden;
+}
+.sx-tabla th {
+    background: var(--sx-fondo-suave);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    padding: 12px 16px;
+}
+.sx-tabla td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--sx-borde);
+}
+.sx-tabla tr:hover td { background: var(--sx-hover); }
+
+/* Mensajes */
+.sx-mensaje {
+    padding: 12px 16px;
+    border-radius: var(--sx-radio);
+    border-left: 4px solid;
+    margin-bottom: 16px;
+}
+.sx-mensaje-ok { background: var(--sx-ok-suave); border-color: var(--sx-ok); color: var(--sx-ok-oscuro); }
+.sx-mensaje-error { background: var(--sx-error-suave); border-color: var(--sx-error); color: var(--sx-error); }
+.sx-mensaje-aviso { background: var(--sx-naranja-suave); border-color: var(--sx-naranja); }
+
+/* Footer */
+.sx-footer {
+    background: var(--sx-negro);
+    color: #fff;
+    padding: 40px 0 24px;
+    font-size: 14px;
+}
+.sx-footer a { color: #fff; text-decoration: none; display: block; margin-bottom: 8px; }
+.sx-footer h4 { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+.sx-footer-legal {
+    border-top: 1px solid #333;
+    margin-top: 32px;
+    padding-top: 16px;
+    font-size: 12px;
+}
+
+/* Celular */
+@media (max-width: 768px) {
+    .sx-contenedor { padding: 0 16px; }
+    .sx-display { font-size: 32px; }
+    .sx-h2 { font-size: 28px; }
+    .sx-h3 { font-size: 22px; }
+    .sx-seccion { padding: 48px 0; }
+    .sx-nav a { margin-left: 12px; }
+}
+
+/* ===== Agregados para el sistema (no vienen de sixt.com.ar) ===== */
+
+/* Contenido de cada pantalla: aire arriba y abajo */
+.sx-principal { padding-top: 32px; padding-bottom: 64px; min-height: calc(100vh - 64px - 200px); }
+
+/* Header: links a la izquierda, usuario a la derecha */
+.sx-header-izq { display: flex; align-items: center; }
+.sx-header-izq .sx-nav { margin-left: 24px; }
+.sx-nav a.sx-nav-activo { color: var(--sx-naranja); }
+.sx-header-usuario { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+.sx-header-usuario a { color: #fff; text-decoration: none; }
+
+/* Etiqueta chica (rol, estado, permisos) */
+.sx-etiqueta {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--sx-fondo-suave);
+    color: var(--sx-negro);
+    font-size: 12px;
+    font-weight: 700;
+}
+.sx-header .sx-etiqueta { background: #333; color: #fff; }
+
+/* Footer en columnas */
+.sx-footer-columnas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+}
+
+/* Login: sección negra con la card del formulario */
+.sx-login {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 48px;
+    align-items: center;
+}
+@media (max-width: 768px) {
+    .sx-login { grid-template-columns: 1fr; }
+    /* En el celular el header crece y los links bajan de renglón */
+    .sx-header { height: auto; padding: 12px 0; }
+    .sx-header .sx-contenedor, .sx-header-izq { flex-wrap: wrap; gap: 8px; }
+    .sx-header-izq .sx-nav { margin-left: 0; }
+}
+.sx-btn-ancho { width: 100%; }
+
+/* Pantallas de ABM: tabla a la izquierda (2/3), formulario a la derecha (1/3) */
+.sx-dos-columnas {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+.sx-mitades {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* Caja blanca con borde (formularios, fichas) */
+.sx-panel {
+    background: #fff;
+    border: 1px solid var(--sx-borde);
+    border-radius: var(--sx-radio);
+    padding: 24px;
+}
+.sx-panel-titulo {
+    font-family: var(--sx-fuente-titulo);
+    font-weight: 900;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 16px;
+}
+
+/* La tabla va dentro de una caja con borde y scroll horizontal en el celular */
+.sx-tabla-caja {
+    border: 1px solid var(--sx-borde);
+    border-radius: var(--sx-radio);
+    overflow-x: auto;
+}
+.sx-tabla tr:last-child td { border-bottom: none; }
+.sx-tabla td.sx-vacio { text-align: center; color: var(--sx-gris-texto); }
+.sx-derecha { text-align: right; }
+.sx-negrita { font-weight: 700; }
+.sx-sin-corte { white-space: nowrap; }
+
+/* Acciones de cada fila: chicas y sin naranja (el naranja es para la accion principal) */
+.sx-acciones { display: flex; gap: 8px; }
+.sx-acciones form { margin: 0; }
+.sx-btn-borde {
+    background: #fff;
+    color: var(--sx-negro);
+    border: 1px solid var(--sx-borde);
+}
+.sx-btn-borde:hover { background: var(--sx-fondo-suave); filter: none; }
+.sx-btn-peligro { background: #fff; color: var(--sx-error); border: 1px solid var(--sx-error); }
+.sx-btn-peligro:hover { background: var(--sx-error-suave); filter: none; }
+.sx-link { background: none; border: none; color: var(--sx-gris-texto); text-decoration: underline; cursor: pointer; font-size: 14px; }
+
+/* Etiquetas de estado */
+.sx-etiqueta-ok { background: var(--sx-ok-suave); color: var(--sx-ok-oscuro); }
+.sx-etiqueta-alerta { background: #FFF6DE; color: #8A5A00; }
+
+/* Checkbox con texto al lado (permisos, vehiculos de una reserva) */
+.sx-check { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.sx-check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--sx-naranja); }
+
+/* Inicio: numeros grandes del resumen */
+.sx-stat {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--sx-borde);
+    border-radius: var(--sx-radio);
+    padding: 24px;
+    text-decoration: none;
+    color: var(--sx-negro);
+}
+a.sx-stat:hover { border-color: var(--sx-negro); }
+.sx-stat-numero { font-family: var(--sx-fuente-titulo); font-weight: 900; font-size: 48px; line-height: 1; }
+
+/* Datos tipo ficha (Mi cuenta) */
+.sx-ficha { margin: 0; }
+.sx-ficha dt { font-size: 14px; font-weight: 700; color: var(--sx-gris-texto); }
+.sx-ficha dd { margin: 0 0 12px; }
+
+/* Tablas del sistema un poco mas compactas que las de la skill */
+.sx-tabla th, .sx-tabla td { padding: 10px 12px; font-size: 14px; }
+
+/* Si no entran tabla y formulario lado a lado, el formulario baja */
+@media (max-width: 1200px) {
+    .sx-dos-columnas { grid-template-columns: 1fr; }
+    .sx-dos-columnas > .sx-panel { max-width: 560px; }
+}
+@media (max-width: 900px) {
+    .sx-mitades { grid-template-columns: 1fr; }
+}
+
+/* Espaciados y detalles chicos */
+.sx-separado { margin-top: 32px; }
+.sx-btn + .sx-btn { margin-top: 8px; }
+.sx-sin-borde { border: none; padding: 0; margin: 0 0 16px; }
+.sx-fila-vehiculo { align-items: center; padding: 12px 0; border-bottom: 1px solid var(--sx-borde); }
+
+/* Reservas: buscador en una fila (4 campos + boton) */
+.sx-buscador-campos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+}
+.sx-buscador-campos .sx-campo { margin-bottom: 0; }
+.sx-buscador-campos .sx-btn { height: 56px; }
+@media (max-width: 900px) {
+    .sx-buscador-campos { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+    .sx-buscador-campos { grid-template-columns: 1fr; }
+}
+
+/* Bloque negro de presentacion (pantalla "Reservar" del cliente) */
+.sx-hero {
+    background: var(--sx-negro);
+    color: #fff;
+    border-radius: 16px;
+    padding: 40px;
+}
+@media (max-width: 768px) {
+    .sx-hero { padding: 24px 16px; }
+}
+
+/* Tarjeta de auto disponible: se marca en naranja cuando esta elegida */
+.sx-card-auto { border: 1px solid var(--sx-borde); }
+.sx-card-auto:has(input[type="checkbox"]:checked) { border: 2px solid var(--sx-naranja); }
+.sx-titulo-auto { margin: 12px 0 8px; }
+.sx-campo-angosto { max-width: 420px; }
+
+/* Pestañas con chips (Catalogo: Modelos / Tipos y precios) */
+.sx-pestanias { display: flex; gap: 8px; margin-bottom: 24px; }

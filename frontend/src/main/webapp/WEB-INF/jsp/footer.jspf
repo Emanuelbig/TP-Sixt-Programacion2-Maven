@@ -1,7 +1,32 @@
-        <p class="text-center text-muted mt-5 small">
-            Programación II &middot; Trabajo Práctico Sixt &middot; Grupo H
-        </p>
-    </div>
+    </main>
+
+    <%-- Footer negro en columnas, como sixt.com.ar --%>
+    <footer class="sx-footer">
+        <div class="sx-contenedor">
+            <div class="sx-footer-columnas">
+                <div>
+                    <a class="sx-logo" href="${ctx}/inicio">SIXT</a>
+                    <p class="sx-texto-gris">Gestión de reservas de autos.</p>
+                </div>
+                <c:if test="${not empty usuario}">
+                    <div>
+                        <h4>Mi cuenta</h4>
+                        <a href="${ctx}/inicio">Inicio</a>
+                        <a href="${ctx}/mi-cuenta">Mis datos</a>
+                        <a href="${ctx}/logout">Salir</a>
+                    </div>
+                </c:if>
+                <div>
+                    <h4>Trabajo Práctico</h4>
+                    <span class="sx-texto-gris">Programación II · INSPT-UTN</span><br>
+                    <span class="sx-texto-gris">Grupo H</span>
+                </div>
+            </div>
+            <div class="sx-footer-legal sx-texto-gris">
+                Proyecto académico. No está afiliado a Sixt.
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>

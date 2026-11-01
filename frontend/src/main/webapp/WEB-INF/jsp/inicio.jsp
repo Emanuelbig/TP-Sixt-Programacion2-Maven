@@ -1,56 +1,62 @@
 <%@include file="header.jspf" %>
 
-        <h2 class="mb-4">Bienvenido, ${usuario.nombre}</h2>
+        <h1 class="sx-h2">Hola, <c:out value="${usuario.nombre}"/></h1>
 
-        <%-- Cada tarjeta lleva a su pantalla solo si el rol tiene permiso para entrar --%>
         <c:set var="administra" value="${usuario.permisos.contains('ADMINISTRAR')}" />
         <c:set var="vende" value="${usuario.permisos.contains('VENDER')}" />
 
         <c:choose>
             <c:when test="${administra or vende}">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <a href="${administra ? ctx.concat('/oficinas') : '#'}" class="card shadow-sm text-decoration-none text-reset">
-                            <div class="card-body text-center">
-                                <div class="display-6">${resumen.oficinas}</div>
-                                <div class="text-muted">Oficinas</div>
+                <p class="sx-texto-gris">Resumen del sistema.</p>
+                <%-- Si el rol puede entrar a la pantalla, la tarjeta es un link; si no, es solo informativa --%>
+                <div class="sx-grilla">
+                    <c:choose>
+                        <c:when test="${administra}">
+                            <a href="${ctx}/oficinas" class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.oficinas}</div><div class="sx-texto-gris">Oficinas</div>
+                            </a>
+                            <a href="${ctx}/vehiculos" class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.vehiculos}</div><div class="sx-texto-gris">Vehículos</div>
+                            </a>
+                            <a href="${ctx}/personas" class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.personas}</div><div class="sx-texto-gris">Personas</div>
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.oficinas}</div><div class="sx-texto-gris">Oficinas</div>
                             </div>
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="${administra ? ctx.concat('/vehiculos') : '#'}" class="card shadow-sm text-decoration-none text-reset">
-                            <div class="card-body text-center">
-                                <div class="display-6">${resumen.vehiculos}</div>
-                                <div class="text-muted">Vehículos</div>
+                            <div class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.vehiculos}</div><div class="sx-texto-gris">Vehículos</div>
                             </div>
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="${administra ? ctx.concat('/personas') : '#'}" class="card shadow-sm text-decoration-none text-reset">
-                            <div class="card-body text-center">
-                                <div class="display-6">${resumen.personas}</div>
-                                <div class="text-muted">Personas</div>
+                            <div class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.personas}</div><div class="sx-texto-gris">Personas</div>
                             </div>
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="${vende ? ctx.concat('/reservas') : '#'}" class="card shadow-sm text-decoration-none text-reset">
-                            <div class="card-body text-center">
-                                <div class="display-6">${resumen.reservas}</div>
-                                <div class="text-muted">Reservas</div>
+                        </c:otherwise>
+                    </c:choose>
+                    <c:choose>
+                        <c:when test="${vende}">
+                            <a href="${ctx}/reservas" class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.reservas}</div><div class="sx-texto-gris">Reservas</div>
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="sx-stat">
+                                <div class="sx-stat-numero">${resumen.reservas}</div><div class="sx-texto-gris">Reservas</div>
                             </div>
-                        </a>
-                    </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </c:when>
             <c:otherwise>
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <p class="mb-3">Desde acá podés ver el estado de tus alquileres.</p>
-                        <c:if test="${usuario.permisos.contains('ALQUILAR')}">
-                            <a href="${ctx}/mis-reservas" class="btn btn-primary">Ver mis reservas</a>
-                        </c:if>
-                    </div>
+                <div class="sx-panel">
+                    <p>Buscá un auto libre para tus fechas o revisá tus alquileres.</p>
+                    <c:if test="${usuario.permisos.contains('ALQUILAR')}">
+                        <div class="sx-acciones">
+                            <a href="${ctx}/reservar" class="sx-btn">Reservar un auto</a>
+                            <a href="${ctx}/mis-reservas" class="sx-btn sx-btn-oscuro">Ver mis reservas</a>
+                        </div>
+                    </c:if>
                 </div>
             </c:otherwise>
         </c:choose>

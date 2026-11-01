@@ -1,9 +1,9 @@
 <%@include file="header.jspf" %>
 
-        <div class="alert alert-danger">
-            <h5 class="alert-heading">Algo salió mal</h5>
-            <p class="mb-0">${requestScope['jakarta.servlet.error.message']}</p>
+        <h1 class="sx-h2">Algo salió mal</h1>
+        <div class="sx-mensaje sx-mensaje-error">
+            <c:out value="${requestScope['jakarta.servlet.error.message']}"/>
         </div>
-        <a href="${ctx}/inicio" class="btn btn-secondary">← Volver al inicio</a>
+        <a href="${ctx}/inicio" class="sx-btn sx-btn-oscuro">Volver al inicio</a>
 
 <%@include file="footer.jspf" %>

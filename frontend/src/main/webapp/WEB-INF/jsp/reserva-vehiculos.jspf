@@ -1,0 +1,66 @@
+<%-- Paso 2 de la reserva: los autos libres en esas fechas. Solo aparece despues de buscar.
+     Variables que define la pantalla que lo incluye: "accionReserva" y "elegirCliente" (true para el vendedor) --%>
+<c:if test="${disponibles != null}">
+    <section class="sx-separado">
+        <h2 class="sx-h3">Autos disponibles</h2>
+        <p class="sx-texto-gris">
+            Del <c:out value="${param.fechaDesde}"/> al <c:out value="${param.fechaHasta}"/>.
+            Marcá uno o más e indicá con cuántos litros de nafta salen.
+        </p>
+
+        <c:choose>
+            <c:when test="${empty disponibles}">
+                <div class="sx-mensaje sx-mensaje-aviso">No hay autos libres en esas fechas. Probá con otro rango.</div>
+            </c:when>
+            <c:otherwise>
+                <form action="${ctx}${accionReserva}" method="POST">
+                    <%-- Lo que se eligio en el paso 1 viaja oculto, para no pedirlo de nuevo --%>
+                    <input type="hidden" name="oficinaOrigenId" value="${fn:escapeXml(param.oficinaOrigenId)}">
+                    <input type="hidden" name="oficinaDestinoId" value="${fn:escapeXml(param.oficinaDestinoId)}">
+                    <input type="hidden" name="fechaDesde" value="${fn:escapeXml(param.fechaDesde)}">
+                    <input type="hidden" name="fechaHasta" value="${fn:escapeXml(param.fechaHasta)}">
+
+                    <c:if test="${elegirCliente}">
+                        <div class="sx-campo sx-campo-angosto">
+                            <label for="clienteId" class="sx-label">Cliente</label>
+                            <select id="clienteId" name="clienteId" class="sx-select" required>
+                                <c:forEach var="persona" items="${personas}">
+                                    <c:if test="${persona.rol.permisos.contains('ALQUILAR')}">
+                                        <option value="${persona.id}" ${persona.id == param.clienteId ? 'selected' : ''}><c:out value="${persona.nombre}"/></option>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </c:if>
+
+                    <div class="sx-grilla">
+                        <c:forEach var="vehiculo" items="${disponibles}">
+                            <div class="sx-card sx-card-auto">
+                                <div class="sx-card-cuerpo">
+                                    <span class="sx-etiqueta"><c:out value="${vehiculo.modelo.tipo.nombre}"/></span>
+                                    <h3 class="sx-h3 sx-titulo-auto"><c:out value="${vehiculo.modelo.marca} ${vehiculo.modelo.nombre}"/></h3>
+                                    <p class="sx-texto-gris">
+                                        <c:out value="${vehiculo.patente}"/> · <c:out value="${vehiculo.color}"/> · ${vehiculo.anio}<br>
+                                        Hoy está en <c:out value="${vehiculo.oficina.zona}"/>
+                                    </p>
+                                    <p class="sx-subtitulo">$ <fmt:formatNumber value="${vehiculo.modelo.tipo.precio}" minFractionDigits="2" maxFractionDigits="2"/> <span class="sx-chico">por día</span></p>
+
+                                    <label class="sx-check">
+                                        <input type="checkbox" name="vehiculoId" value="${vehiculo.id}">
+                                        <span class="sx-negrita">Elegir este auto</span>
+                                    </label>
+                                    <label for="nafta-${vehiculo.id}" class="sx-label">Litros de nafta</label>
+                                    <input id="nafta-${vehiculo.id}" name="litrosNafta_${vehiculo.id}" type="number" min="0" step="1"
+                                           value="0" class="sx-input">
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+
+                    <%-- La accion principal de la pantalla: el unico boton naranja --%>
+                    <button type="submit" class="sx-btn sx-separado">Reservar</button>
+                </form>
+            </c:otherwise>
+        </c:choose>
+    </section>
+</c:if>

@@ -43,7 +43,15 @@ public class ReservaControlador {
     @ResponseStatus(HttpStatus.CREATED)
     public Reserva crear(@Valid @RequestBody NuevaReserva datos, HttpServletRequest request) {
         var usuario = (UsuarioLogueado) request.getAttribute("usuarioAutenticado");
-        if (!usuario.id().equals(datos.vendedorId())) throw new AccesoDenegadoExcepcion();
+        if (usuario.permisos().contains(Permiso.VENDER)) {
+            // El vendedor reserva para cualquier cliente, pero siempre a su propio nombre
+            if (!usuario.id().equals(datos.vendedorId())) throw new AccesoDenegadoExcepcion();
+        } else {
+            // El cliente solo puede reservar para si mismo, y sin vendedor (reserva online)
+            if (!usuario.id().equals(datos.clienteId()) || datos.vendedorId() != null) {
+                throw new AccesoDenegadoExcepcion();
+            }
+        }
         return reservaServicio.crear(datos);
     }
 

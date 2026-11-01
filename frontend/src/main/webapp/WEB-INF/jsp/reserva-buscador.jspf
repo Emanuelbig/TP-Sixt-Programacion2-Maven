@@ -1,0 +1,32 @@
+<%-- Paso 1 de la reserva: oficinas y fechas. Es un GET: solo consulta, no guarda nada.
+     Lo usan reservas.jsp (vendedor) y reservar.jsp (cliente); cada una define "accionReserva" antes de incluirlo --%>
+<form action="${ctx}${accionReserva}" method="GET" class="sx-buscador">
+    <div class="sx-buscador-campos">
+        <div class="sx-campo">
+            <label for="oficinaOrigenId" class="sx-label">Retiro en</label>
+            <select id="oficinaOrigenId" name="oficinaOrigenId" class="sx-select">
+                <c:forEach var="oficina" items="${oficinas}">
+                    <option value="${oficina.id}" ${oficina.id == param.oficinaOrigenId ? 'selected' : ''}><c:out value="${oficina.zona}"/></option>
+                </c:forEach>
+            </select>
+        </div>
+        <div class="sx-campo">
+            <label for="oficinaDestinoId" class="sx-label">Devolución en</label>
+            <select id="oficinaDestinoId" name="oficinaDestinoId" class="sx-select">
+                <c:forEach var="oficina" items="${oficinas}">
+                    <option value="${oficina.id}" ${oficina.id == param.oficinaDestinoId ? 'selected' : ''}><c:out value="${oficina.zona}"/></option>
+                </c:forEach>
+            </select>
+        </div>
+        <div class="sx-campo">
+            <label for="fechaDesde" class="sx-label">Desde</label>
+            <input id="fechaDesde" name="fechaDesde" type="date" min="${hoy}" value="${fn:escapeXml(param.fechaDesde)}" class="sx-input" required>
+        </div>
+        <div class="sx-campo">
+            <label for="fechaHasta" class="sx-label">Hasta</label>
+            <input id="fechaHasta" name="fechaHasta" type="date" min="${hoy}" value="${fn:escapeXml(param.fechaHasta)}" class="sx-input" required>
+        </div>
+        <%-- Naranja solo mientras es la accion principal; cuando ya hay resultados, lo principal es "Reservar" --%>
+        <button type="submit" class="sx-btn ${disponibles == null ? '' : 'sx-btn-oscuro'}">Buscar disponibles</button>
+    </div>
+</form>

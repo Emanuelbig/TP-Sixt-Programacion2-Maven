@@ -80,9 +80,13 @@ public class ReservaServicio {
         }
 
         Persona cliente = personaServicio.buscarActiva(datos.clienteId());
-        Persona vendedor = personaServicio.buscarActiva(datos.vendedorId());
         exigirPermiso(cliente, Permiso.ALQUILAR, "cliente");
-        exigirPermiso(vendedor, Permiso.VENDER, "vendedor");
+        // Sin vendedor es una reserva online, hecha por el mismo cliente
+        Persona vendedor = null;
+        if (datos.vendedorId() != null) {
+            vendedor = personaServicio.buscarActiva(datos.vendedorId());
+            exigirPermiso(vendedor, Permiso.VENDER, "vendedor");
+        }
 
         Reserva reserva = new Reserva();
         reserva.setCliente(cliente);

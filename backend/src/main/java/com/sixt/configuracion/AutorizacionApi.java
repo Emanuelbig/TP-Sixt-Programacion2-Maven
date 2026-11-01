@@ -68,10 +68,16 @@ public class AutorizacionApi extends OncePerRequestFilter {
         if (ruta.equals("/api/clientes") || ruta.startsWith("/api/clientes/")) {
             exigir(usuario, Permiso.ADMINISTRAR_CLIENTES);
         } else if (ruta.equals("/api/reservas") || ruta.startsWith("/api/reservas/")) {
-            if (lectura && !usuario.permisos().contains(Permiso.VENDER)) {
+            boolean alta = ruta.equals("/api/reservas") && "POST".equals(metodo);
+            if ((lectura || alta) && !usuario.permisos().contains(Permiso.VENDER)) {
                 exigir(usuario, Permiso.ALQUILAR);
-                // El controlador limita la consulta a la identidad autenticada.
+                // El controlador limita la consulta y el alta a la identidad autenticada.
             } else exigir(usuario, Permiso.VENDER);
+        } else if (lectura && (ruta.equals("/api/vehiculos/disponibles") || ruta.equals("/api/oficinas"))) {
+            // Las necesita el buscador de reservas: lo usan vendedores y clientes
+            if (!usuario.permisos().contains(Permiso.ADMINISTRAR) && !usuario.permisos().contains(Permiso.VENDER)) {
+                exigir(usuario, Permiso.ALQUILAR);
+            }
         } else if (lectura && (ruta.equals("/api/vehiculos") || ruta.equals("/api/modelos") || ruta.equals("/api/oficinas"))) {
             if (!usuario.permisos().contains(Permiso.ADMINISTRAR)) exigir(usuario, Permiso.VENDER);
         } else {
