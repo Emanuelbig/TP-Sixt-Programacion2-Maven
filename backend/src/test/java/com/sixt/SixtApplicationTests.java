@@ -1,13 +1,14 @@
 package com.sixt;
 
 import com.sixt.modelo.TipoModelo;
-import com.sixt.modelo.Permiso;
+import com.sixt.seguridad.modelo.Accion;
+import com.sixt.seguridad.modelo.Recurso;
+import com.sixt.seguridad.repositorio.RolRepositorio;
 import com.sixt.dto.NuevaPersona;
 import com.sixt.dto.DatosPersona;
 import com.sixt.dto.UsuarioLogueado;
 import com.sixt.servicio.PersonaServicio;
 import com.sixt.repositorio.PersonaRepositorio;
-import com.sixt.repositorio.RolRepositorio;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validator;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,10 +45,10 @@ class SixtApplicationTests {
 		Integer cantidadTablas = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
 						+ "WHERE TABLE_SCHEMA = 'PUBLIC' "
-						+ "AND TABLE_NAME IN ('DETALLE_RESERVA', 'RESERVA', 'MODELO', 'TIPO_MODELO', 'OFICINA', 'PERSONA', 'ROL', 'VEHICULO')",
+						+ "AND TABLE_NAME IN ('DETALLE_RESERVA', 'RESERVA', 'MODELO', 'TIPO_MODELO', 'OFICINA', 'PERSONA', 'ROL', 'USUARIO', 'VEHICULO')",
 				Integer.class);
 
-		assertThat(cantidadTablas).isEqualTo(8);
+		assertThat(cantidadTablas).isEqualTo(9);
 	}
 
 	@Test
@@ -75,7 +76,7 @@ class SixtApplicationTests {
     @Test
     @Transactional
     void guardaYActualizaLaDireccionDelCliente() {
-        Long rolId = rolRepositorio.findAll().stream().filter(r -> r.tiene(Permiso.ALQUILAR))
+        Long rolId = rolRepositorio.findAll().stream().filter(r -> r.tiene(Recurso.RESERVA, Accion.ALQUILAR))
                 .findFirst().orElseThrow().getId();
         var creada = personaServicio.crear(new NuevaPersona(45678901, "Cliente prueba",
                 "  Av. Corrientes 123, piso 2  ", "direccion@example.com", "1122334455", rolId, "prueba123"));
@@ -111,7 +112,7 @@ class SixtApplicationTests {
     void permisosSeGuardanComoTextoSinEnumNativo() {
         String tipo = jdbcTemplate.queryForObject("""
                 SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'ROL_PERMISO' AND COLUMN_NAME = 'PERMISO'
+                WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'ROL_PERMISO' AND COLUMN_NAME = 'ACCION'
                 """, String.class);
         assertThat(tipo).isEqualTo("CHARACTER VARYING");
     }

@@ -24,6 +24,11 @@ public class OficinasServlet extends PantallaServlet {
         return "oficinas.jsp";
     }
 
+    @Override
+    protected String recurso() {
+        return "OFICINA";
+    }
+
     // Baja (DELETE), edicion con id (PUT) o alta sin id (POST)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

@@ -3,6 +3,8 @@ package com.sixt.servicio;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,16 +17,19 @@ import com.sixt.excepcion.ConflictoExcepcion;
 import com.sixt.excepcion.DatosInvalidosExcepcion;
 import com.sixt.excepcion.RecursoNoEncontradoExcepcion;
 import com.sixt.modelo.Oficina;
-import com.sixt.modelo.Permiso;
 import com.sixt.modelo.Persona;
 import com.sixt.modelo.Reserva;
-import com.sixt.modelo.Rol;
+import com.sixt.seguridad.modelo.Accion;
+import com.sixt.seguridad.modelo.Permiso;
+import com.sixt.seguridad.modelo.Recurso;
+import com.sixt.seguridad.modelo.Rol;
+import com.sixt.seguridad.modelo.Usuario;
 import com.sixt.modelo.Vehiculo;
 import com.sixt.repositorio.ReservaRepositorio;
 import com.sixt.servicio.precio.CalculadoraPrecio;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.EnumSet;
+import java.util.Set;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,12 +49,13 @@ class ReservaServicioTest {
     @Mock private VehiculoServicio vehiculoServicio;
     @Mock private OficinaServicio oficinaServicio;
     @Mock private CalculadoraPrecio calculadoraPrecio;
+    @Mock private UbicacionDeFlota ubicacionDeFlota;
 
     @InjectMocks private ReservaServicio reservaServicio;
 
     private final Vehiculo auto = vehiculo(1L, "APG023");
-    private final Persona cliente = persona(3L, "Ema", Permiso.ALQUILAR);
-    private final Persona vendedor = persona(2L, "Pepe", Permiso.VENDER);
+    private final Persona cliente = persona(3L, "Ema", Accion.ALQUILAR);
+    private final Persona vendedor = persona(2L, "Pepe", Accion.VENDER);
 
     @Test
     void creaLaReservaConElPrecioQueDaLaCalculadora() {
@@ -80,7 +86,9 @@ class ReservaServicioTest {
     @Test
     void rechazaUnVehiculoYaReservadoEnEsasFechas() {
         when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
-        when(reservaRepositorio.vehiculoOcupadoEntre(1L, DESDE, HASTA)).thenReturn(true);
+        // Oficinas del pedido: retiro 1, devolucion 2
+        doThrow(new ConflictoExcepcion("El vehiculo APG023 no esta disponible"))
+                .when(ubicacionDeFlota).exigirDisponible(auto, DESDE, HASTA, 1L, 2L);
 
         assertThatThrownBy(() -> reservaServicio.crear(pedido(DESDE, HASTA, 3L, 2L)))
                 .isInstanceOf(ConflictoExcepcion.class)
@@ -187,8 +195,9 @@ class ReservaServicioTest {
         when(vehiculoServicio.buscarActivo(1L)).thenReturn(auto);
         when(vehiculoServicio.buscarActivo(2L)).thenReturn(segundo);
         when(calculadoraPrecio.calcular(auto, DESDE, HASTA)).thenReturn(BigDecimal.TEN);
-        when(reservaRepositorio.vehiculoOcupadoEntre(1L, DESDE, HASTA)).thenReturn(false);
-        when(reservaRepositorio.vehiculoOcupadoEntre(2L, DESDE, HASTA)).thenReturn(true);
+        // El primero pasa la validacion (no se prepara nada); el segundo no esta disponible
+        lenient().doThrow(new ConflictoExcepcion("El vehiculo AE123CD no esta disponible"))
+                .when(ubicacionDeFlota).exigirDisponible(segundo, DESDE, HASTA, 1L, 2L);
         assertThatThrownBy(() -> reservaServicio.crear(new NuevaReserva(3L, 2L, 1L, 2L, DESDE, HASTA,
                 List.of(new NuevoDetalleReserva(1L, 20), new NuevoDetalleReserva(2L, 30)))))
                 .isInstanceOf(ConflictoExcepcion.class);
@@ -265,14 +274,16 @@ class ReservaServicioTest {
         return vehiculo;
     }
 
-    private static Persona persona(Long id, String nombre, Permiso permiso) {
-        Rol rol = new Rol();
-        rol.setNombre(permiso == Permiso.ALQUILAR ? "CLIENTE" : "VENDEDOR");
-        rol.setPermisos(EnumSet.of(permiso));
+    private static Persona persona(Long id, String nombre, Accion capacidad) {
+        Rol rol = new Rol(capacidad == Accion.ALQUILAR ? "CLIENTE" : "VENDEDOR",
+                Set.of(Permiso.de(Recurso.RESERVA, capacidad)));
+        Usuario usuario = new Usuario();
+        usuario.setId(id);
+        usuario.setRol(rol);
         Persona persona = new Persona();
         persona.setId(id);
         persona.setNombre(nombre);
-        persona.setRol(rol);
+        persona.setUsuario(usuario);
         return persona;
     }
 }

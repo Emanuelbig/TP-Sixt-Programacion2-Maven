@@ -16,11 +16,13 @@
                                 <td class="sx-texto-gris"><c:out value="${oficina.direccion}"/></td>
                                 <td>
                                     <div class="sx-acciones">
-                                        <a href="${ctx}/oficinas?editar=${oficina.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
+                                        <c:if test="${puedeEditar}"><a href="${ctx}/oficinas?editar=${oficina.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a></c:if>
+                                        <c:if test="${puedeEliminar}">
                                         <form action="${ctx}/oficinas/baja" method="POST" onsubmit="return confirm('¿Dar de baja esta oficina?')">
                                             <input type="hidden" name="id" value="${oficina.id}">
                                             <button class="sx-btn sx-btn-chico sx-btn-peligro">Dar de baja</button>
                                         </form>
+                                        </c:if>
                                     </div>
                                 </td>
                             </tr>
@@ -33,6 +35,9 @@
             </div>
 
             <%-- El mismo formulario sirve para alta y para edicion (si hay "editando") --%>
+            <%-- Formulario de alta (puedeCrear) o de edicion (puedeEditar): lo calcula PantallaServlet
+                 segun el recurso de la pantalla. Igual decide el backend: esto evita mostrar lo que no se puede usar --%>
+            <c:if test="${(empty editando and puedeCrear) or (not empty editando and puedeEditar)}">
             <div class="sx-panel" id="formulario">
                 <h2 class="sx-panel-titulo">${empty editando ? 'Nueva oficina' : 'Editar oficina'}</h2>
                 <form action="${ctx}/oficinas" method="POST">
@@ -51,6 +56,7 @@
                     </c:if>
                 </form>
             </div>
+            </c:if>
         </div>
 
 <%@include file="footer.jspf" %>

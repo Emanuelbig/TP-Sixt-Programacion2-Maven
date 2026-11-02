@@ -12,6 +12,7 @@ import java.util.Map;
 
 // Lo comun de reservar en dos pasos, para el vendedor (/reservas) y el cliente (/reservar):
 //  1. buscar: oficinas y fechas -> el backend devuelve los vehiculos libres en ese rango
+//     que van a estar en la oficina de retiro (y que se pueden devolver en la elegida)
 //  2. reservar: los vehiculos elegidos, con los litros de nafta de cada uno
 final class BuscadorReserva {
 
@@ -37,8 +38,14 @@ final class BuscadorReserva {
             request.setAttribute("error", "Las fechas no tienen un formato válido");
             return;
         }
-        request.setAttribute("disponibles",
-                ClienteBackend.getLista(request, "/api/vehiculos/disponibles?desde=" + desde + "&hasta=" + hasta));
+        String retiro = request.getParameter("oficinaOrigenId");
+        String devolucion = request.getParameter("oficinaDestinoId");
+        if (retiro == null || retiro.isBlank() || devolucion == null || devolucion.isBlank()) {
+            request.setAttribute("error", "Elegí la oficina de retiro y la de devolución");
+            return;
+        }
+        request.setAttribute("disponibles", ClienteBackend.getLista(request, "/api/vehiculos/disponibles?desde="
+                + desde + "&hasta=" + hasta + "&oficinaOrigenId=" + retiro + "&oficinaDestinoId=" + devolucion));
     }
 
     // Arma el JSON de la reserva con lo que vino del formulario. Cliente y vendedor los agrega cada servlet

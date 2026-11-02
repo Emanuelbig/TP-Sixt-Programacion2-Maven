@@ -53,6 +53,8 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
+      # Clave para firmar los JWT (minimo 32 caracteres). Cambiarla invalida todas las sesiones.
+      SIXT_JWT_SECRETO: ${SIXT_JWT_SECRETO:-clave-docker-sixt-cambiar-antes-de-entregar}
     ports:
       - "8000:8000"
     restart: unless-stopped

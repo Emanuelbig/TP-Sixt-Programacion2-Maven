@@ -26,8 +26,8 @@ public class MiCuentaServlet extends PantallaServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Object id = UsuarioEnSesion.id(request);
-        ClienteBackend.Respuesta respuesta = ClienteBackend.patch(request, "/api/personas/" + id + "/contrasenia",
+        // El backend toma el id del token: cada uno cambia solo su propia contraseña
+        ClienteBackend.Respuesta respuesta = ClienteBackend.patch(request, "/api/cuenta/contrasenia",
                 Formulario.campos(request, "contraseniaActual", "contraseniaNueva"));
         responder(respuesta, "/mi-cuenta?ok", request, response);
     }

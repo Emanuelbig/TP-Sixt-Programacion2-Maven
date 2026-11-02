@@ -32,12 +32,14 @@ public class VehiculoControlador {
         return vehiculoServicio.listar();
     }
 
-    // GET /api/vehiculos/disponibles?desde=2026-11-10&hasta=2026-11-12
-    // Los activos que no tienen una reserva sin devolver que se pise con esas fechas
+    // GET /api/vehiculos/disponibles?desde=2026-11-10&hasta=2026-11-12&oficinaOrigenId=1&oficinaDestinoId=2
+    // Los activos libres en esas fechas que van a estar en la oficina de retiro (ver UbicacionDeFlota)
     @GetMapping("/vehiculos/disponibles")
     public List<Vehiculo> disponibles(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return vehiculoServicio.listarDisponibles(desde, hasta);
+                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                                      @RequestParam Long oficinaOrigenId,
+                                      @RequestParam Long oficinaDestinoId) {
+        return vehiculoServicio.listarDisponibles(desde, hasta, oficinaOrigenId, oficinaDestinoId);
     }
 
     @PostMapping("/vehiculos")

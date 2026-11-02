@@ -20,11 +20,16 @@
         </div>
         <div class="sx-campo">
             <label for="fechaDesde" class="sx-label">Desde</label>
-            <input id="fechaDesde" name="fechaDesde" type="date" min="${hoy}" value="${fn:escapeXml(param.fechaDesde)}" class="sx-input" required>
+            <%-- Al elegir "Desde", el calendario de "Hasta" no deja elegir un dia anterior
+                 (si ya tenia uno anterior, lo corre al mismo dia) --%>
+            <input id="fechaDesde" name="fechaDesde" type="date" min="${hoy}" value="${fn:escapeXml(param.fechaDesde)}" class="sx-input" required
+                   onchange="var hasta = document.getElementById('fechaHasta'); hasta.min = this.value; if (hasta.value && hasta.value < this.value) { hasta.value = this.value; }">
         </div>
         <div class="sx-campo">
             <label for="fechaHasta" class="sx-label">Hasta</label>
-            <input id="fechaHasta" name="fechaHasta" type="date" min="${hoy}" value="${fn:escapeXml(param.fechaHasta)}" class="sx-input" required>
+            <%-- Al volver de una busqueda, el minimo ya sale del "Desde" elegido --%>
+            <input id="fechaHasta" name="fechaHasta" type="date" min="${empty param.fechaDesde ? hoy : fn:escapeXml(param.fechaDesde)}"
+                   value="${fn:escapeXml(param.fechaHasta)}" class="sx-input" required>
         </div>
         <%-- Naranja solo mientras es la accion principal; cuando ya hay resultados, lo principal es "Reservar" --%>
         <button type="submit" class="sx-btn ${disponibles == null ? '' : 'sx-btn-oscuro'}">Buscar disponibles</button>

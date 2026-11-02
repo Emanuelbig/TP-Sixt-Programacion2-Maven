@@ -6,7 +6,7 @@
             <div class="sx-tabla-caja">
                 <table class="sx-tabla">
                     <thead>
-                        <tr><th>#</th><th>Nombre</th><th>DNI</th><th>Dirección</th><th>Email</th><th>Teléfono</th><th>Rol</th><th></th></tr>
+                        <tr><th>#</th><th>Nombre</th><th>DNI</th><th>Dirección</th><th>Email</th><th>Teléfono</th><c:if test="${eligeRol}"><th>Rol</th></c:if><th></th></tr>
                     </thead>
                     <tbody>
                         <c:forEach var="persona" items="${personas}">
@@ -17,26 +17,31 @@
                                 <td><c:out value="${persona.direccion}"/></td>
                                 <td class="sx-texto-gris"><c:out value="${persona.email}"/></td>
                                 <td class="sx-sin-corte"><c:out value="${persona.telefono}"/></td>
-                                <td><span class="sx-etiqueta"><c:out value="${persona.rol.nombre}"/></span></td>
+                                <c:if test="${eligeRol}"><td><span class="sx-etiqueta"><c:out value="${persona.rol.nombre}"/></span></td></c:if>
                                 <td>
                                     <div class="sx-acciones">
-                                        <a href="${ctx}/personas?editar=${persona.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
+                                        <c:if test="${puedeEditar}"><a href="${ctx}/personas?editar=${persona.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a></c:if>
+                                        <c:if test="${puedeEliminar}">
                                         <form action="${ctx}/personas/baja" method="POST" onsubmit="return confirm('¿Dar de baja esta persona?')">
                                             <input type="hidden" name="id" value="${persona.id}">
                                             <button class="sx-btn sx-btn-chico sx-btn-peligro">Dar de baja</button>
                                         </form>
+                                        </c:if>
                                     </div>
                                 </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty personas}">
-                            <tr><td colspan="8" class="sx-vacio">No hay personas cargadas</td></tr>
+                            <tr><td colspan="${eligeRol ? 8 : 7}" class="sx-vacio">No hay personas cargadas</td></tr>
                         </c:if>
                     </tbody>
                 </table>
             </div>
 
             <%-- El mismo formulario sirve para alta y para edicion (si hay "editando") --%>
+            <%-- Formulario de alta (puedeCrear) o de edicion (puedeEditar): lo calcula PantallaServlet
+                 segun el recurso de la pantalla. Igual decide el backend: esto evita mostrar lo que no se puede usar --%>
+            <c:if test="${(empty editando and puedeCrear) or (not empty editando and puedeEditar)}">
             <div class="sx-panel" id="formulario">
                 <h2 class="sx-panel-titulo">${empty editando ? 'Nueva persona' : 'Editar persona'}</h2>
                 <form action="${ctx}/personas" method="POST">
@@ -62,6 +67,9 @@
                         <label for="telefono" class="sx-label">Teléfono</label>
                         <input id="telefono" name="telefono" value="${fn:escapeXml(editando.telefono)}" type="tel" class="sx-input" required>
                     </div>
+                    <%-- Solo quien administra empleados elige el rol. Sin este campo el backend
+                         asigna CLIENTE en el alta y conserva el rol actual en la edicion --%>
+                    <c:if test="${eligeRol}">
                     <div class="sx-campo">
                         <label for="rolId" class="sx-label">Rol</label>
                         <select id="rolId" name="rolId" class="sx-select">
@@ -70,6 +78,7 @@
                             </c:forEach>
                         </select>
                     </div>
+                    </c:if>
                     <c:if test="${empty editando}">
                         <div class="sx-campo">
                             <label for="contrasenia" class="sx-label">Contraseña inicial</label>
@@ -82,6 +91,7 @@
                     </c:if>
                 </form>
             </div>
+            </c:if>
         </div>
 
 <%@include file="footer.jspf" %>

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.HttpCookie;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,14 +11,15 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
-// La cookie de la API pertenece a la sesion de cada usuario, nunca al cliente HTTP global.
+// El token de la API (JWT) se guarda en la sesion de cada usuario, nunca en el cliente HTTP global,
+// y viaja en cada pedido como "Authorization: Bearer <token>".
 public class ClienteBackend {
     private static final String RUTA_BACKEND = System.getenv().getOrDefault("BACKEND_URL", "http://localhost:8000");
     private static final HttpClient CLIENTE = HttpClient.newHttpClient();
     private static final ObjectMapper JSON = new ObjectMapper();
     private ClienteBackend() { }
 
-    public record Respuesta(int estado, Map<String, Object> cuerpo, String cookieSesion) {
+    public record Respuesta(int estado, Map<String, Object> cuerpo) {
         public boolean ok() { return estado >= 200 && estado < 300; }
         public String error() {
             Object error = cuerpo.get("error");
@@ -51,8 +51,8 @@ public class ClienteBackend {
     private static HttpRequest.Builder peticion(HttpServletRequest request, String ruta) {
         var builder = HttpRequest.newBuilder().uri(URI.create(RUTA_BACKEND + ruta));
         var sesion = request.getSession(false);
-        if (!ruta.equals("/api/login") && sesion != null && sesion.getAttribute("cookieBackend") instanceof String cookie) {
-            builder.header("Cookie", cookie);
+        if (!ruta.equals("/api/login") && sesion != null && sesion.getAttribute("tokenBackend") instanceof String token) {
+            builder.header("Authorization", "Bearer " + token);
         }
         return builder;
     }
@@ -65,11 +65,7 @@ public class ClienteBackend {
                     .method(metodo, cuerpo).build(), HttpResponse.BodyHandlers.ofString());
             Map<String, Object> mapa = respuesta.body() == null || respuesta.body().isBlank() ? Map.of()
                     : JSON.readValue(respuesta.body(), new TypeReference<Map<String, Object>>() {});
-            String cookie = respuesta.headers().allValues("Set-Cookie").stream()
-                    .flatMap(valor -> HttpCookie.parse(valor).stream())
-                    .filter(c -> c.getName().equals("SIXT_API_SESSION"))
-                    .map(c -> c.getName() + "=" + c.getValue()).findFirst().orElse(null);
-            return new Respuesta(respuesta.statusCode(), mapa, cookie);
+            return new Respuesta(respuesta.statusCode(), mapa);
         } catch (Exception e) {
             throw new ServletException("No se pudo comunicar con el backend en " + RUTA_BACKEND, e);
         }

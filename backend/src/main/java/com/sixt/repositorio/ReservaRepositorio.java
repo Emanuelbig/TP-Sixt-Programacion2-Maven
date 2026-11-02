@@ -36,4 +36,41 @@ public interface ReservaRepositorio extends JpaRepository<Reserva, Long> {
     boolean vehiculoOcupadoEntre(@Param("vehiculoId") Long vehiculoId,
                                  @Param("fechaDesde") LocalDate fechaDesde,
                                  @Param("fechaHasta") LocalDate fechaHasta);
+
+    // Para los reportes: reservas no canceladas que tienen al menos un dia dentro del periodo
+    @Query("""
+            select r from Reserva r
+            where r.fechaCancelacion is null
+              and r.fechaDesde <= :hasta
+              and r.fechaHasta >= :desde
+            order by r.fechaDesde asc
+            """)
+    List<Reserva> noCanceladasQueSeSuperponenCon(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
+    // Para los reportes: cuantas reservas que empezaban en el periodo se cancelaron
+    long countByFechaCancelacionIsNotNullAndFechaDesdeBetween(LocalDate desde, LocalDate hasta);
+
+    // Reservas pendientes del vehiculo (ni devueltas ni canceladas) que terminan antes de esa
+    // fecha, la mas reciente primero: la primera dice en que oficina va a quedar el auto
+    @Query("""
+            select r from Reserva r join r.detalles d
+            where d.vehiculo.id = :vehiculoId
+              and r.devuelto = false
+              and r.fechaCancelacion is null
+              and r.fechaHasta < :fecha
+            order by r.fechaHasta desc
+            """)
+    List<Reserva> pendientesQueTerminanAntesDe(@Param("vehiculoId") Long vehiculoId, @Param("fecha") LocalDate fecha);
+
+    // Reservas pendientes del vehiculo que empiezan despues de esa fecha, la mas proxima primero:
+    // la primera dice en que oficina tiene que estar el auto para esa reserva
+    @Query("""
+            select r from Reserva r join r.detalles d
+            where d.vehiculo.id = :vehiculoId
+              and r.devuelto = false
+              and r.fechaCancelacion is null
+              and r.fechaDesde > :fecha
+            order by r.fechaDesde asc
+            """)
+    List<Reserva> pendientesQueEmpiezanDespuesDe(@Param("vehiculoId") Long vehiculoId, @Param("fecha") LocalDate fecha);
 }

@@ -27,6 +27,11 @@ public class VehiculosServlet extends PantallaServlet {
     }
 
     @Override
+    protected String recurso() {
+        return "VEHICULO";
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         ClienteBackend.Respuesta respuesta;

@@ -6,9 +6,12 @@
 
         <h1 class="sx-h2">Reservas</h1>
 
-        <h2 class="sx-panel-titulo">Nueva reserva</h2>
-        <%@include file="reserva-buscador.jspf" %>
-        <%@include file="reserva-vehiculos.jspf" %>
+        <%-- Registrar una reserva: hay que poder crearla y figurar como vendedor --%>
+        <c:if test="${puedeRegistrar}">
+            <h2 class="sx-panel-titulo">Nueva reserva</h2>
+            <%@include file="reserva-buscador.jspf" %>
+            <%@include file="reserva-vehiculos.jspf" %>
+        </c:if>
 
         <h2 class="sx-h3 sx-separado">Todas las reservas</h2>
         <div class="sx-tabla-caja">
@@ -50,6 +53,9 @@
                                     </c:when>
                                     <c:when test="${reserva.devuelto}">
                                         <span class="sx-etiqueta sx-etiqueta-ok">Devuelto</span>
+                                    </c:when>
+                                    <c:when test="${not usuario.permisos.contains('RESERVA:EDITAR')}">
+                                        <span class="sx-etiqueta">Pendiente</span>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="sx-acciones">

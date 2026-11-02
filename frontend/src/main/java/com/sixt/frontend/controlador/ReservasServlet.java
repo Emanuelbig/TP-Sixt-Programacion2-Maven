@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Map;
 
 // Pantalla del vendedor: todas las reservas + reservar para cualquier cliente
@@ -18,8 +19,18 @@ public class ReservasServlet extends PantallaServlet {
             request.setAttribute("mensaje", "La reserva se creó correctamente");
         }
         request.setAttribute("reservas", ClienteBackend.getLista(request, "/api/reservas"));
-        request.setAttribute("personas", ClienteBackend.getLista(request, "/api/clientes"));
-        BuscadorReserva.cargar(request);
+        // La tabla lo usa para ofrecer "Cancelar" solo en las reservas que no empezaron
+        request.setAttribute("hoy", LocalDate.now().toString());
+        // El formulario de alta solo se arma si puede registrar reservas como vendedor
+        // (un rol de solo lectura, como un auditor, ve el listado sin el formulario)
+        boolean puedeRegistrar = UsuarioEnSesion.puede(request, "RESERVA:CREAR")
+                && UsuarioEnSesion.puede(request, "RESERVA:VENDER");
+        request.setAttribute("puedeRegistrar", puedeRegistrar);
+        if (puedeRegistrar) {
+            // Para el vendedor son solo clientes; la vista ofrece los que pueden alquilar
+            request.setAttribute("personas", ClienteBackend.getLista(request, "/api/personas"));
+            BuscadorReserva.cargar(request);
+        }
     }
 
     @Override

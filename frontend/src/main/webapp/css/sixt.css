@@ -438,3 +438,10 @@ a.sx-stat:hover { border-color: var(--sx-negro); }
 
 /* Pestañas con chips (Catalogo: Modelos / Tipos y precios) */
 .sx-pestanias { display: flex; gap: 8px; margin-bottom: 24px; }
+/* Reportes: indicadores mas chicos (son cinco en fila), fila de totales y barras por mes (sin JavaScript) */
+.sx-indicadores { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
+.sx-stat-chico { font-size: 30px; }
+.sx-total td { font-weight: 700; border-top: 2px solid var(--sx-negro); }
+.sx-columna-barra { width: 40%; }
+.sx-barra { height: 14px; background: var(--sx-fondo-suave); border-radius: 999px; overflow: hidden; }
+.sx-barra-relleno { height: 100%; background: var(--sx-naranja); border-radius: 999px; }

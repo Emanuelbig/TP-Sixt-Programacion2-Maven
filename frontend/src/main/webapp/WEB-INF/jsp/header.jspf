@@ -7,24 +7,28 @@
             <div class="sx-header-izq">
                 <a class="sx-logo" href="${ctx}/inicio">SIXT</a>
                 <nav class="sx-nav">
-                    <c:if test="${usuario.permisos.contains('ADMINISTRAR')}">
+                    <%-- Los permisos son los efectivos (con la cascada) que devuelve el backend --%>
+                    <c:if test="${usuario.permisos.contains('OFICINA:VER')}">
                         <a href="${ctx}/oficinas"  class="${ruta == '/oficinas'  ? 'sx-nav-activo' : ''}">Oficinas</a>
+                    </c:if>
+                    <c:if test="${usuario.permisos.contains('VEHICULO:VER')}">
                         <a href="${ctx}/vehiculos" class="${ruta == '/vehiculos' ? 'sx-nav-activo' : ''}">Vehículos</a>
                         <a href="${ctx}/modelos"   class="${ruta == '/modelos' or ruta == '/tipos' ? 'sx-nav-activo' : ''}">Catálogo</a>
+                    </c:if>
+                    <c:if test="${usuario.permisos.contains('USUARIO:VER') or usuario.permisos.contains('CLIENTE:VER')}">
                         <a href="${ctx}/personas"  class="${ruta == '/personas'  ? 'sx-nav-activo' : ''}">Personas</a>
+                    </c:if>
+                    <c:if test="${usuario.permisos.contains('ROL:VER')}">
                         <a href="${ctx}/roles"     class="${ruta == '/roles'     ? 'sx-nav-activo' : ''}">Roles</a>
                     </c:if>
-                    <c:if test="${usuario.permisos.contains('ADMINISTRAR_CLIENTES')}">
-                        <a href="${ctx}/clientes" class="${ruta == '/clientes' ? 'sx-nav-activo' : ''}">Clientes</a>
-                    </c:if>
-                    <c:if test="${usuario.permisos.contains('VENDER')}">
+                    <c:if test="${usuario.permisos.contains('RESERVA:VER')}">
                         <a href="${ctx}/reservas" class="${ruta == '/reservas' ? 'sx-nav-activo' : ''}">Reservas</a>
                     </c:if>
-                    <c:if test="${usuario.permisos.contains('ALQUILAR')}">
+                    <c:if test="${usuario.permisos.contains('RESERVA:ALQUILAR')}">
                         <a href="${ctx}/reservar" class="${ruta == '/reservar' ? 'sx-nav-activo' : ''}">Reservar</a>
                         <a href="${ctx}/mis-reservas" class="${ruta == '/mis-reservas' ? 'sx-nav-activo' : ''}">Mis reservas</a>
                     </c:if>
-                    <c:if test="${usuario.permisos.contains('VER_REPORTES')}">
+                    <c:if test="${usuario.permisos.contains('REPORTE:VER')}">
                         <a href="${ctx}/reportes" class="${ruta == '/reportes' ? 'sx-nav-activo' : ''}">Reportes</a>
                     </c:if>
                 </nav>

@@ -6,4 +6,8 @@ public class RecursoNoEncontradoExcepcion extends RuntimeException {
     public RecursoNoEncontradoExcepcion(String recurso, Long id) {
         super("No existe " + recurso + " con id " + id);
     }
+
+    public RecursoNoEncontradoExcepcion(String mensaje) {
+        super(mensaje);
+    }
 }

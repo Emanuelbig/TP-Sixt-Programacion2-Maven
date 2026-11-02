@@ -4,7 +4,8 @@ import com.sixt.dto.NuevaReserva;
 import com.sixt.dto.NuevoDetalleReserva;
 import com.sixt.modelo.Reserva;
 import com.sixt.modelo.Vehiculo;
-import com.sixt.modelo.Permiso;
+import com.sixt.seguridad.modelo.Accion;
+import com.sixt.seguridad.modelo.Recurso;
 import com.sixt.repositorio.*;
 import com.sixt.servicio.ReservaServicio;
 import jakarta.persistence.EntityManager;
@@ -34,8 +35,8 @@ class DetalleReservaPersistenciaTest {
     @Test
     void persisteDetallesConsultaDisponibilidadYDevuelveTodos() throws Exception {
         List<Vehiculo> autos = vehiculos.findAll();
-        var cliente = personas.findAll().stream().filter(p -> p.puede(Permiso.ALQUILAR)).findFirst().orElseThrow();
-        var vendedor = personas.findAll().stream().filter(p -> p.puede(Permiso.VENDER)).findFirst().orElseThrow();
+        var cliente = personas.findAll().stream().filter(p -> p.puede(Recurso.RESERVA, Accion.ALQUILAR)).findFirst().orElseThrow();
+        var vendedor = personas.findAll().stream().filter(p -> p.puede(Recurso.RESERVA, Accion.VENDER)).findFirst().orElseThrow();
         var origen = oficinas.findAll().getFirst();
         var destino = oficinas.findAll().getLast();
         LocalDate desde = LocalDate.now().plusDays(5);
