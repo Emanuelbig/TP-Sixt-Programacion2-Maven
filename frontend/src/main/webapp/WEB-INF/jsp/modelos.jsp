@@ -20,12 +20,14 @@
                                 <td class="sx-derecha sx-sin-corte">$ <fmt:formatNumber value="${modelo.tipo.precio}" minFractionDigits="2" maxFractionDigits="2"/></td>
                                 <td>
                                     <div class="sx-acciones">
-                                        <a href="${ctx}/modelos?editar=${modelo.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a>
+                                        <c:if test="${puedeEditar}"><a href="${ctx}/modelos?editar=${modelo.id}#formulario" class="sx-btn sx-btn-chico sx-btn-borde">Editar</a></c:if>
                                         <%-- Solo se puede si nadie lo usa: si no, el backend responde con el motivo --%>
+                                        <c:if test="${puedeEliminar}">
                                         <form action="${ctx}/modelos/baja" method="POST" onsubmit="return confirm('¿Eliminar este modelo?')">
                                             <input type="hidden" name="id" value="${modelo.id}">
                                             <button class="sx-btn sx-btn-chico sx-btn-peligro">Eliminar</button>
                                         </form>
+                                        </c:if>
                                     </div>
                                 </td>
                             </tr>
@@ -38,6 +40,9 @@
             </div>
 
             <%-- El mismo formulario sirve para alta y para edicion (si hay "editando") --%>
+            <%-- Formulario de alta (puedeCrear) o de edicion (puedeEditar): lo calcula PantallaServlet
+                 segun el recurso de la pantalla. Igual decide el backend: esto evita mostrar lo que no se puede usar --%>
+            <c:if test="${(empty editando and puedeCrear) or (not empty editando and puedeEditar)}">
             <div class="sx-panel" id="formulario">
                 <h2 class="sx-panel-titulo">${empty editando ? 'Nuevo modelo' : 'Editar modelo'}</h2>
                 <form action="${ctx}/modelos" method="POST">
@@ -66,6 +71,7 @@
                     </c:if>
                 </form>
             </div>
+            </c:if>
         </div>
 
 <%@include file="footer.jspf" %>

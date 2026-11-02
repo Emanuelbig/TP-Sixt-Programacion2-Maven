@@ -25,6 +25,7 @@ public class VehiculoServicio {
     private final ModeloRepositorio modeloRepositorio;
     private final ReservaRepositorio reservaRepositorio;
     private final OficinaServicio oficinaServicio;
+    private final UbicacionDeFlota ubicacionDeFlota;
 
     // Solo los que no fueron dados de baja
     public List<Vehiculo> listar() {
@@ -32,13 +33,14 @@ public class VehiculoServicio {
     }
 
     // Recorre los activos y se queda con los que no estan reservados en ese rango
-    public List<Vehiculo> listarDisponibles(LocalDate desde, LocalDate hasta) {
+    public List<Vehiculo> listarDisponibles(LocalDate desde, LocalDate hasta,
+                                            Long oficinaRetiroId, Long oficinaDevolucionId) {
         if (hasta.isBefore(desde)) {
             throw new DatosInvalidosExcepcion("La fecha de fin no puede ser anterior a la de inicio");
         }
         List<Vehiculo> disponibles = new ArrayList<>();
         for (Vehiculo vehiculo : listar()) {
-            if (!reservaRepositorio.vehiculoOcupadoEntre(vehiculo.getId(), desde, hasta)) {
+            if (ubicacionDeFlota.estaDisponible(vehiculo, desde, hasta, oficinaRetiroId, oficinaDevolucionId)) {
                 disponibles.add(vehiculo);
             }
         }

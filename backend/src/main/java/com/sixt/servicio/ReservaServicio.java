@@ -10,8 +10,9 @@ import java.util.Set;
 import com.sixt.excepcion.ConflictoExcepcion;
 import com.sixt.excepcion.DatosInvalidosExcepcion;
 import com.sixt.excepcion.RecursoNoEncontradoExcepcion;
-import com.sixt.modelo.Permiso;
 import com.sixt.modelo.Persona;
+import com.sixt.seguridad.modelo.Accion;
+import com.sixt.seguridad.modelo.Recurso;
 import com.sixt.modelo.Reserva;
 import com.sixt.modelo.Vehiculo;
 import com.sixt.repositorio.ReservaRepositorio;
@@ -32,6 +33,7 @@ public class ReservaServicio {
     private final VehiculoServicio vehiculoServicio;
     private final OficinaServicio oficinaServicio;
     private final CalculadoraPrecio calculadoraPrecio;
+    private final UbicacionDeFlota ubicacionDeFlota;
 
     public List<Reserva> listar() {
         return reservaRepositorio.findAll();
@@ -65,10 +67,9 @@ public class ReservaServicio {
                 throw new DatosInvalidosExcepcion("Un vehiculo no puede repetirse en la misma reserva");
             }
             Vehiculo vehiculo = vehiculoServicio.buscarActivo(pedido.vehiculoId());
-            if (reservaRepositorio.vehiculoOcupadoEntre(vehiculo.getId(), fechaDesde, fechaHasta)) {
-                throw new ConflictoExcepcion("El vehiculo " + vehiculo.getPatente()
-                        + " no esta disponible entre el " + fechaDesde + " y el " + fechaHasta);
-            }
+            // Libre en esas fechas y en la oficina de retiro (la misma regla que el buscador)
+            ubicacionDeFlota.exigirDisponible(vehiculo, fechaDesde, fechaHasta,
+                    datos.oficinaOrigenId(), datos.oficinaDestinoId());
             DetalleReserva detalle = new DetalleReserva();
             detalle.setVehiculo(vehiculo);
             detalle.setPatente(vehiculo.getPatente());
@@ -81,12 +82,12 @@ public class ReservaServicio {
         }
 
         Persona cliente = personaServicio.buscarActiva(datos.clienteId());
-        exigirPermiso(cliente, Permiso.ALQUILAR, "cliente");
+        exigirCapacidad(cliente, Accion.ALQUILAR, "cliente");
         // Sin vendedor es una reserva online, hecha por el mismo cliente
         Persona vendedor = null;
         if (datos.vendedorId() != null) {
             vendedor = personaServicio.buscarActiva(datos.vendedorId());
-            exigirPermiso(vendedor, Permiso.VENDER, "vendedor");
+            exigirCapacidad(vendedor, Accion.VENDER, "vendedor");
         }
 
         Reserva reserva = new Reserva();
@@ -144,11 +145,11 @@ public class ReservaServicio {
         return reservaRepositorio.save(reserva);
     }
 
-    private void exigirPermiso(Persona persona, Permiso permiso, String papel) {
-        if (!persona.puede(permiso)) {
+    private void exigirCapacidad(Persona persona, Accion capacidad, String papel) {
+        if (!persona.puede(Recurso.RESERVA, capacidad)) {
             throw new DatosInvalidosExcepcion(persona.getNombre() + " no puede figurar como " + papel
                     + " de una reserva: su rol " + persona.getRol().getNombre()
-                    + " no tiene el permiso " + permiso);
+                    + " no tiene el permiso " + Recurso.RESERVA + ":" + capacidad);
         }
     }
 }

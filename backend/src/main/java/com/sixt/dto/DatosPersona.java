@@ -31,6 +31,7 @@ public record DatosPersona(
         @Pattern(regexp = "\\d{6,15}", message = "El telefono debe tener solo numeros, entre 6 y 15 digitos")
         String telefono,
 
-        @NotNull(message = "El rol es obligatorio")
+        // Opcional: sin rol, el alta es de un CLIENTE y la edicion conserva el rol actual.
+        // Quien puede asignar cada rol lo controlan PersonaServicio y ControlDePrivilegios
         Long rolId) {
 }

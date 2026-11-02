@@ -25,6 +25,11 @@ public class TiposServlet extends PantallaServlet {
         return "tipos.jsp";
     }
 
+    @Override
+    protected String recurso() {
+        return "VEHICULO";
+    }
+
     // Eliminar (DELETE), edicion con id (PUT) o alta sin id (POST)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

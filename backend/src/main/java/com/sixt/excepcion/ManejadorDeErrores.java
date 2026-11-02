@@ -6,12 +6,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 // Unico lugar donde las excepciones se convierten en respuestas HTTP.
 // Asi los controladores y servicios no tienen que saber de codigos de estado.
@@ -24,6 +27,13 @@ public class ManejadorDeErrores {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public RespuestaError accesoDenegado(AccesoDenegadoExcepcion e) {
         return new RespuestaError(e.getMessage());
+    }
+
+    // Un @PreAuthorize rechazado: sin este handler terminaria en el 500 generico de abajo
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public RespuestaError accesoDenegadoPorSpring(AccessDeniedException e) {
+        return new RespuestaError("No tenes permiso para realizar esta operacion");
     }
 
     @ExceptionHandler(RecursoNoEncontradoExcepcion.class)
@@ -80,6 +90,19 @@ public class ManejadorDeErrores {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public RespuestaError parametroInvalido(MethodArgumentTypeMismatchException e) {
         return new RespuestaError("El valor '" + e.getValue() + "' no es valido para " + e.getName());
+    }
+
+    // Ej. un POST a una ruta que solo acepta GET
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public RespuestaError metodoNoPermitido(HttpRequestMethodNotSupportedException e) {
+        return new RespuestaError("El metodo " + e.getMethod() + " no esta permitido en esta ruta");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public RespuestaError rutaInexistente(NoResourceFoundException e) {
+        return new RespuestaError("No existe la ruta pedida");
     }
 
     // Cualquier otra cosa es un error nuestro: se loguea completo y al cliente

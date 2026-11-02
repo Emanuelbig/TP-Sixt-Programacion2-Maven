@@ -1,6 +1,5 @@
 package com.sixt.controlador;
 
-import com.sixt.dto.CambioContrasenia;
 import com.sixt.dto.DatosPersona;
 import com.sixt.dto.NuevaPersona;
 import com.sixt.modelo.Persona;
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,13 +40,6 @@ public class PersonaControlador {
     @PutMapping("/{id}")
     public Persona actualizar(@PathVariable Long id, @Valid @RequestBody DatosPersona datos) {
         return personaServicio.actualizar(id, datos);
-    }
-
-    // PATCH: cambia solo una parte de la persona, la contraseña
-    @PatchMapping("/{id}/contrasenia")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cambiarContrasenia(@PathVariable Long id, @Valid @RequestBody CambioContrasenia cambio) {
-        personaServicio.cambiarContrasenia(id, cambio);
     }
 
     // Baja logica: responde 204 (sin cuerpo)

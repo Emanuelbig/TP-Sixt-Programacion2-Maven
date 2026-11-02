@@ -14,15 +14,28 @@ public class PersonasServlet extends PantallaServlet {
 
     @Override
     protected void cargarDatos(HttpServletRequest request) throws ServletException {
+        // El backend ya filtra: el admin recibe empleados y clientes, el vendedor solo clientes
         List<Map<String, Object>> personas = ClienteBackend.getLista(request, "/api/personas");
         request.setAttribute("personas", personas);
-        request.setAttribute("roles", ClienteBackend.getLista(request, "/api/roles"));
+        // Solo quien administra empleados elige el rol; si no, el backend asigna CLIENTE
+        boolean eligeRol = UsuarioEnSesion.puede(request, "USUARIO:CREAR")
+                || UsuarioEnSesion.puede(request, "USUARIO:EDITAR");
+        request.setAttribute("eligeRol", eligeRol);
+        if (eligeRol) {
+            request.setAttribute("roles", ClienteBackend.getLista(request, "/api/roles"));
+        }
         marcarEdicion(request, personas);
     }
 
     @Override
     protected String vista() {
         return "personas.jsp";
+    }
+
+    // Empleados (USUARIO) y clientes (CLIENTE) en la misma pantalla
+    @Override
+    protected String[] recursos() {
+        return new String[] {"USUARIO", "CLIENTE"};
     }
 
     @Override

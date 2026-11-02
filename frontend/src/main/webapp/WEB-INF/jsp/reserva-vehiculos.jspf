@@ -25,7 +25,7 @@
                             <label for="clienteId" class="sx-label">Cliente</label>
                             <select id="clienteId" name="clienteId" class="sx-select" required>
                                 <c:forEach var="persona" items="${personas}">
-                                    <c:if test="${persona.rol.permisos.contains('ALQUILAR')}">
+                                    <c:if test="${persona.rol.permisosEfectivos.contains('RESERVA:ALQUILAR')}">
                                         <option value="${persona.id}" ${persona.id == param.clienteId ? 'selected' : ''}><c:out value="${persona.nombre}"/></option>
                                     </c:if>
                                 </c:forEach>
