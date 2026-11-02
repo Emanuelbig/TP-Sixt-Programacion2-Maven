@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+//tabla donde se guarda
 @Table(name = "detalle_reserva", uniqueConstraints =
         @UniqueConstraint(name = "uk_detalle_reserva_vehiculo", columnNames = {"reserva_id", "vehiculo_id"}))
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -43,9 +44,11 @@ public class DetalleReserva {
     private String color;
     private int anio;
 
+    // Columna no nulo
     @Column(nullable = false)
     private int litrosNafta;
 
+    // Precision 12 digitos en total, 2 digitos despues de la coma
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal precioAlquiler;
 }

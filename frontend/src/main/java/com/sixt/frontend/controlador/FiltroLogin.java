@@ -39,7 +39,8 @@ public class FiltroLogin extends HttpFilter {
             Map.entry("/reservas/cancelar", "VENDER"),
             Map.entry("/mis-reservas", "ALQUILAR"),
             Map.entry("/mis-reservas/cancelar", "ALQUILAR"),
-            Map.entry("/reservar", "ALQUILAR"));
+            Map.entry("/reservar", "ALQUILAR"),
+            Map.entry("/reportes", "VER_REPORTES")); 
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

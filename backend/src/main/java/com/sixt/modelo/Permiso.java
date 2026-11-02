@@ -9,7 +9,8 @@ public enum Permiso {
     ADMINISTRAR("Gestiona oficinas, vehiculos, personas y roles"),
     ADMINISTRAR_CLIENTES("Gestiona exclusivamente clientes"),
     ALQUILAR("Puede ser cliente de una reserva"),
-    VENDER("Puede registrar reservas como vendedor");
+    VENDER("Puede registrar reservas como vendedor"),
+    VER_REPORTES("Puede ver los reportes de reservas");
 
     private final String descripcion;
 

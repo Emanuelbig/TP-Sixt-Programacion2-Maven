@@ -17,6 +17,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class AutorizacionApi extends OncePerRequestFilter {
+
     private final AutenticacionServicio autenticacion;
 
     @Override
@@ -60,9 +61,13 @@ public class AutorizacionApi extends OncePerRequestFilter {
         String metodo = request.getMethod();
         boolean lectura = "GET".equals(metodo);
         if ((ruta.equals("/api/sesion") && lectura) || (ruta.equals("/api/logout") && "POST".equals(metodo))
-                || (ruta.equals("/api/resumen") && lectura)) return;
+                || (ruta.equals("/api/resumen") && lectura)) {
+            return;
+        }
         if (ruta.matches("/api/personas/\\d+/contrasenia") && "PATCH".equals(metodo)) {
-            if (!ruta.equals("/api/personas/" + usuario.id() + "/contrasenia")) throw new AccesoDenegadoExcepcion();
+            if (!ruta.equals("/api/personas/" + usuario.id() + "/contrasenia")) {
+                throw new AccesoDenegadoExcepcion();
+            }
             return;
         }
         if (ruta.equals("/api/clientes") || ruta.startsWith("/api/clientes/")) {
@@ -73,14 +78,20 @@ public class AutorizacionApi extends OncePerRequestFilter {
             if ((lectura || alta || cancelacion) && !usuario.permisos().contains(Permiso.VENDER)) {
                 exigir(usuario, Permiso.ALQUILAR);
                 // El controlador limita la consulta, el alta y la cancelacion a la identidad autenticada.
-            } else exigir(usuario, Permiso.VENDER);
+            } else {
+                exigir(usuario, Permiso.VENDER);
+            }
         } else if (lectura && (ruta.equals("/api/vehiculos/disponibles") || ruta.equals("/api/oficinas"))) {
             // Las necesita el buscador de reservas: lo usan vendedores y clientes
             if (!usuario.permisos().contains(Permiso.ADMINISTRAR) && !usuario.permisos().contains(Permiso.VENDER)) {
                 exigir(usuario, Permiso.ALQUILAR);
             }
         } else if (lectura && (ruta.equals("/api/vehiculos") || ruta.equals("/api/modelos") || ruta.equals("/api/oficinas"))) {
-            if (!usuario.permisos().contains(Permiso.ADMINISTRAR)) exigir(usuario, Permiso.VENDER);
+            if (!usuario.permisos().contains(Permiso.ADMINISTRAR)) {
+                exigir(usuario, Permiso.VENDER);
+            }
+        } else if (ruta.startsWith("/api/reportes")) {
+            exigir(usuario, Permiso.VER_REPORTES);
         } else {
             exigir(usuario, Permiso.ADMINISTRAR);
         }
@@ -88,6 +99,8 @@ public class AutorizacionApi extends OncePerRequestFilter {
     }
 
     private void exigir(UsuarioLogueado usuario, Permiso permiso) {
-        if (!usuario.permisos().contains(permiso)) throw new AccesoDenegadoExcepcion();
+        if (!usuario.permisos().contains(permiso)) {
+            throw new AccesoDenegadoExcepcion();
+        }
     }
 }

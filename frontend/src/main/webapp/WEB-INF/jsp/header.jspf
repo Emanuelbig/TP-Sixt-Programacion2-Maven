@@ -24,6 +24,9 @@
                         <a href="${ctx}/reservar" class="${ruta == '/reservar' ? 'sx-nav-activo' : ''}">Reservar</a>
                         <a href="${ctx}/mis-reservas" class="${ruta == '/mis-reservas' ? 'sx-nav-activo' : ''}">Mis reservas</a>
                     </c:if>
+                    <c:if test="${usuario.permisos.contains('VER_REPORTES')}">
+                        <a href="${ctx}/reportes" class="${ruta == '/reportes' ? 'sx-nav-activo' : ''}">Reportes</a>
+                    </c:if>
                 </nav>
             </div>
             <div class="sx-header-usuario">
