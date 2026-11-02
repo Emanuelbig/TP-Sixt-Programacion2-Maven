@@ -2,32 +2,54 @@
 
 TP de Programación II - Grupo H.
 
-El proyecto está separado en dos partes, igual que en la biblioteca:
+El proyecto está separado en dos aplicaciones, igual que en la biblioteca:
 
 ```
 TP-Sixt-Programacion2-Maven/
 ├── backend/             API REST con Spring Boot (devuelve JSON)
 ├── frontend/            Pantallas con Servlets + JSP + JSTL (Tomcat)
 ├── docker-compose.yml   Levanta todo junto
-└── docs/                UML
+└── docs/                Diagramas UML y scripts de migración
 ```
 
 ## Cómo funciona
 
 ```
-navegador → frontend (Servlet) → HTTP/JSON → backend (RestController) → MySQL
+navegador → frontend (Servlet) → HTTP/JSON + JWT → backend (RestController) → MySQL
                  ↓
           JSP arma el HTML
 ```
 
 - El **frontend** no toca la base. Le pide los datos al backend con `HttpClient`
   (en `ClienteBackend.java`) y los muestra con JSP.
-- El **backend** lee y guarda en MySQL usando JPA. Sus paquetes:
-  - `controlador/`: los endpoints REST (`@RestController`).
-  - `servicio/`: la lógica de negocio (`@Service`).
-  - `repositorio/`: acceso a la base (`JpaRepository`).
-  - `modelo/`: las entidades JPA (cada clase es una tabla).
-  - `configuracion/`: carga de datos de ejemplo.
+- El **backend** lee y guarda en MySQL usando JPA. Cada pedido pasa por
+  Controlador → Servicio → Repositorio → MySQL.
+
+## Tecnologías
+
+| Parte | Tecnologías |
+|---|---|
+| Backend | Java 21, Spring Boot 4.1 (Web MVC, Data JPA / Hibernate, Validation, Security, OAuth2 Resource Server para JWT), Lombok, MySQL 8.4 |
+| Frontend | Java 21, Jakarta EE 10 (Servlets 6 + JSP 3.1), JSTL 3, Jackson, Tomcat 10.1, CSS propio sin frameworks |
+| Tests | JUnit 5, Mockito, H2 en memoria, ArchUnit, Jasper (compila los JSP) |
+| Infraestructura | Docker Compose: MySQL, phpMyAdmin, backend y frontend |
+
+## Paquetes del backend
+
+Todo vive en `backend/src/main/java/com/sixt/`:
+
+| Paquete | Qué tiene |
+|---|---|
+| `modelo/` | Entidades JPA (cada clase es una tabla): `Oficina`, `TipoModelo`, `Modelo`, `Vehiculo`, `Persona`, `Reserva`, `DetalleReserva` |
+| `repositorio/` | Interfaces `JpaRepository`, con consultas derivadas del nombre y `@Query` para las complejas |
+| `dto/` | Records con lo que entra por la API, con sus validaciones (`@NotBlank`, `@Pattern`...) |
+| `servicio/` | Lógica de negocio (`@Service`) |
+| `servicio/precio/` | `CalculadoraPrecio` (interfaz) y `PrecioPorDia` (regla actual) |
+| `servicio/reporte/` | Reportes de facturación y ocupación |
+| `controlador/` | Endpoints REST (`@RestController`) |
+| `excepcion/` | Excepciones propias y `ManejadorDeErrores`, que las convierte en respuestas HTTP |
+| `configuracion/` | `CargaDatosIniciales`: datos de ejemplo |
+| `seguridad/` | Login, JWT, usuarios, roles y permisos. Es independiente del resto: `ArquitecturaTest` falla si importa algo de la plataforma |
 
 ## Levantarlo con Docker
 
@@ -40,76 +62,187 @@ docker compose up -d --build
 | Contenedor | Qué es | Dirección |
 |---|---|---|
 | `sixt-frontend` | Las pantallas | http://localhost:8081 |
-| `sixt-backend` | La API | http://localhost:8000/api/vehiculos |
+| `sixt-backend` | La API | http://localhost:8000/api/... |
 | `sixt-mysql` | La base de datos | `localhost:3307` |
 | `sixt-phpmyadmin` | Ver la base desde el navegador | http://localhost:8080 |
-
-Usuarios de prueba (se crean solos la primera vez):
-
-| Email | Contraseña | Rol | Qué ve |
-|---|---|---|---|
-| `admin@sixt.com.ar` | `admin123` | ADMIN | Oficinas, vehículos, personas, roles y reservas |
-| `pepe@sixt.com.ar` | `vendedor123` | VENDEDOR | Reservas y clientes |
-| `ema@gmail.com` | `cliente123` | CLIENTE | Mis reservas |
 
 Para apagar todo: `docker compose down`
 
 > MySQL usa el puerto **3307** hacia afuera porque el 3306 suele estar ocupado
 > por un MySQL instalado en la compu. Adentro de Docker sigue siendo 3306.
 
-La primera vez que arranca con la base vacía, el backend carga datos de ejemplo
-(roles, personas, oficinas, modelos y vehículos) desde `CargaDatosIniciales.java`.
+La clave que firma los JWT se toma de la variable `SIXT_JWT_SECRETO` (mínimo 32
+caracteres). Si no se define, Docker usa una de desarrollo. Cambiarla invalida
+todas las sesiones abiertas.
+
+## Usuarios de prueba
+
+La primera vez que arranca con la base vacía, el backend crea los roles
+(`CargaRolesIniciales`) y después personas, oficinas, catálogo, vehículos y
+reservas de ejemplo (`CargaDatosIniciales`). Las fechas de las reservas se
+calculan desde el día de arranque, así los reportes del año siempre tienen datos.
+
+| Email | Contraseña | Rol | Qué ve |
+|---|---|---|---|
+| `sysadmin@sixt.com.ar` | `sysadmin123` | SYSADMIN | Todo, incluida la administración de roles |
+| `admin@sixt.com.ar` | `admin123` | ADMIN | Oficinas, vehículos, catálogo, personas, reservas, reportes; roles solo lectura |
+| `pepe@sixt.com.ar`, `lucia@sixt.com.ar` | `vendedor123` | VENDEDOR | Reservas y clientes; vehículos y oficinas solo lectura |
+| `ema@gmail.com`, `martin@gmail.com`, `sofia@gmail.com`, `juan@gmail.com` | `cliente123` | CLIENTE | Reservar y Mis reservas |
+
+## Permisos
+
+Un permiso es un par `RECURSO:ACCION`, por ejemplo `VEHICULO:EDITAR`.
+
+- **Recursos** (enum `Recurso`): `OFICINA`, `VEHICULO`, `CLIENTE`, `USUARIO`,
+  `RESERVA`, `ROL`, `REPORTE`. Cada uno declara qué acciones admite
+  (`REPORTE` es solo `VER`).
+- **Acciones** (enum `Accion`), con cascada:
+
+  ```
+  ADMINISTRAR ⊃ CREAR, EDITAR, ELIMINAR ⊃ VER ⊃ VER_PROPIAS
+  ```
+
+  `ALQUILAR` y `VENDER` son *capacidades*: dicen qué papel puede cumplir alguien
+  en una reserva (cliente o vendedor). Ninguna otra acción las incluye.
+
+- **Roles**: son datos. Cada rol guarda solo los permisos elegidos y la cascada
+  se calcula al vuelo. Se crean y editan desde la pantalla *Roles*.
+
+Reglas contra la escalada de privilegios (`ControlDePrivilegios`):
+
+- nadie otorga un rol con permisos que él mismo no tiene;
+- nadie modifica a alguien con permisos que él no tiene;
+- nadie cambia su propio rol ni se da de baja a sí mismo;
+- siempre queda al menos un usuario activo con `ROL:ADMINISTRAR`.
+
+## Autenticación (JWT)
+
+1. `POST /api/login` con email y contraseña. La contraseña se guarda hasheada con BCrypt.
+2. El backend devuelve un **JWT** (válido 8 horas) junto con los datos y permisos del usuario.
+3. Cada pedido siguiente lleva el header `Authorization: Bearer <token>`.
+4. En cada pedido los permisos se leen de la base, no del token: un cambio de rol
+   se aplica en el próximo pedido.
+5. `POST /api/logout` o dar de baja a un usuario incrementa su `versionToken`, y
+   todos los tokens emitidos antes dejan de valer aunque no hayan vencido.
+
+El frontend guarda el token en la sesión de Tomcat de cada usuario (nunca en el
+navegador) y lo agrega en cada llamada a la API. Antes de mostrar cada pantalla,
+`FiltroLogin` consulta `/api/sesion`: si el token ya no vale, cierra la sesión y
+manda al login.
 
 ## Pantallas
 
-Cada rol ve solo las pantallas de sus permisos (`FiltroLogin` devuelve 403 si no).
+Cada rol ve solo las pantallas de sus permisos. Si entra a una sin permiso,
+`FiltroLogin` devuelve 403. Lo que pide cada pantalla está en `PermisosDePantalla`.
 
-- **Login**: con email y contraseña. La contraseña se guarda hasheada (BCrypt).
-- **Inicio**: contadores de oficinas, vehículos, personas y reservas.
-- **Oficinas / Vehículos / Personas** (`ADMINISTRAR`): tabla, alta, edición y baja.
-  La baja es lógica: se marca `fechaBaja` y deja de aparecer, pero las reservas
-  viejas siguen intactas. No se puede dar de baja si hay reservas sin devolver.
-- **Roles** (`ADMINISTRAR`): cada rol tiene permisos (`ADMINISTRAR`, `VENDER`,
-  `ALQUILAR`). Se pueden crear roles nuevos desde la pantalla.
-- **Reservas** (`VENDER`): crear reservas y marcarlas como devueltas.
-  - Cada reserva incluye uno o mas vehiculos, con combustible y precio historico por detalle.
-  - El total es la suma de los alquileres de todos sus vehiculos.
-  - No se puede reservar un auto ocupado en esas fechas.
-  - Al devolver, el vehículo queda en la oficina de destino.
-- **Mis reservas** (`ALQUILAR`): las reservas del cliente que inició sesión.
-- **Mi cuenta**: datos propios y cambio de contraseña.
+| Pantalla | Permiso | Qué hace |
+|---|---|---|
+| Login | - | Email y contraseña |
+| Inicio | Estar logueado | Contadores de oficinas, vehículos, personas y reservas activas |
+| Oficinas | `OFICINA:VER` | Tabla, alta, edición y baja |
+| Vehículos | `VEHICULO:VER` | Tabla, alta, edición y baja |
+| Catálogo (Modelos / Tipos y precios) | `VEHICULO:VER` | Modelos por marca y tipo; precio por día de cada tipo |
+| Personas | `USUARIO:VER` o `CLIENTE:VER` | Empleados y clientes. El vendedor solo ve y da de alta clientes |
+| Roles | `ROL:VER` | Matriz recurso × acción para crear y editar roles |
+| Reservas | `RESERVA:VER` | Todas las reservas; registrar (vendedor), devolver y cancelar |
+| Reservar | `RESERVA:ALQUILAR` | El cliente busca autos libres y reserva a su nombre (reserva online) |
+| Mis reservas | `RESERVA:ALQUILAR` | Reservas del cliente logueado; cancelar las que no empezaron |
+| Reportes | `REPORTE:VER` | Facturación y ocupación por vehículo, oficina, vendedor y mes |
+| Mi cuenta | Estar logueado | Datos propios y cambio de contraseña |
+
+Los botones de alta, edición y baja solo aparecen si el usuario tiene el permiso,
+pero esto es solo visual: la decisión real la toma siempre el backend.
+
+## Reglas de negocio
+
+- **Baja lógica**: oficinas, vehículos y personas no se borran. Se marca
+  `fechaBaja`, dejan de aparecer y las reservas viejas siguen intactas.
+  - No se puede dar de baja una oficina con vehículos activos o con reservas
+    pendientes que salen o llegan ahí.
+  - No se puede dar de baja un vehículo o un cliente con reservas sin devolver.
+- **Modelos y tipos** sí se borran de verdad, pero solo si nadie los usa.
+- **Reservas con varios vehículos**: `Reserva` tiene uno o más `DetalleReserva`.
+  Cada detalle guarda una copia de patente, color y año, los litros de nafta y el
+  precio del alquiler. El total es la suma de los detalles. Cambiar un precio
+  después no afecta a las reservas ya hechas.
+- **Precio**: precio por día del tipo × cantidad de días, contando los dos
+  extremos (del 10 al 12 son 3 días).
+- **Disponibilidad** (`UbicacionDeFlota`): un vehículo se puede reservar si
+  1. no tiene otra reserva que se pise con esas fechas;
+  2. ese día va a estar en la oficina de retiro (la de destino de su última reserva
+     anterior, o donde está hoy);
+  3. si tiene una reserva después, se devuelve en la oficina de donde sale esa reserva.
+
+  La misma regla la usan el buscador de disponibles y el alta de reservas.
+- **Quién reserva**: un vendedor registra reservas para cualquier cliente, siempre
+  a su propio nombre. Un cliente reserva solo para sí mismo y sin vendedor.
+- **Devolver**: la devolución es conjunta y todos los vehículos quedan en la
+  oficina de destino.
+- **Cancelar**: solo si la reserva no empezó ni fue devuelta. Con
+  `RESERVA:EDITAR` se cancela cualquiera; el cliente, solo las suyas.
+- **Reportes**: las canceladas no se facturan (se cuentan aparte), una reserva se
+  factura completa en el período en que empieza, y la ocupación cuenta los días
+  alquilados que caen dentro del período.
 
 ## API del backend
 
+Todas las rutas requieren el token, excepto `POST /api/login`.
+Entre paréntesis, el permiso que pide cada una.
+
 | Método | Ruta | Qué hace |
 |---|---|---|
-| POST | `/api/login` | Valida email y contraseña, devuelve el usuario y sus permisos |
-| GET | `/api/sesion` | Datos y permisos de quien inició sesión |
-| POST | `/api/logout` | Cierra la sesión |
+| POST | `/api/login` | Valida email y contraseña; devuelve el token, el usuario y sus permisos (pública) |
+| GET | `/api/sesion` | Datos y permisos actuales de quien hace el pedido |
+| POST | `/api/logout` | Invalida todos los tokens del usuario |
+| PATCH | `/api/cuenta/contrasenia` | Cambia la contraseña propia (`contraseniaActual`, `contraseniaNueva`) |
 | GET | `/api/resumen` | Contadores para el inicio (solo lo activo) |
-| GET / POST | `/api/oficinas` | Listar (activas) / crear oficinas |
-| PUT / DELETE | `/api/oficinas/{id}` | Editar / dar de baja (lógica) una oficina |
-| GET / POST | `/api/vehiculos` | Listar (activos) / crear vehículos |
-| PUT / DELETE | `/api/vehiculos/{id}` | Editar / dar de baja (lógica) un vehículo |
-| GET | `/api/vehiculos/disponibles?desde=&hasta=` | Vehículos libres en ese rango de fechas |
-| GET / POST | `/api/modelos` | Listar / crear modelos |
-| PUT / DELETE | `/api/modelos/{id}` | Editar / eliminar un modelo (solo si ningún vehículo lo usa) |
-| GET / POST | `/api/tipos` | Listar / crear tipos con su precio por día |
-| PUT / DELETE | `/api/tipos/{id}` | Editar (cambiar precio) / eliminar un tipo (solo si ningún modelo lo usa) |
-| GET / POST | `/api/personas` | Listar (activas) / crear personas |
-| PUT / DELETE | `/api/personas/{id}` | Editar / dar de baja (lógica) una persona |
-| PATCH | `/api/personas/{id}/contrasenia` | Cambiar la contraseña propia |
-| GET / POST | `/api/clientes` | Listar / crear clientes (rol CLIENTE) |
-| PUT / DELETE | `/api/clientes/{id}` | Editar / dar de baja (lógica) un cliente |
-| GET / POST | `/api/roles` | Listar / crear roles con sus permisos |
-| PUT / DELETE | `/api/roles/{id}` | Editar / eliminar un rol (solo si nadie lo tiene asignado) |
-| GET | `/api/permisos` | Listar los permisos disponibles |
-| GET / POST | `/api/reservas` | Listar (todas o `?clienteId=`) / crear reservas (vendedor o reserva online del cliente) |
-| POST | `/api/reservas/{id}/devolver` | Marcar una reserva como devuelta |
-| POST | `/api/reservas/{id}/cancelar` | Cancelar una reserva que todavía no empezó |
+| GET / POST | `/api/oficinas` | Listar activas / crear (`OFICINA:VER` o `RESERVA:ALQUILAR` / `OFICINA:CREAR`) |
+| PUT / DELETE | `/api/oficinas/{id}` | Editar / dar de baja (`OFICINA:EDITAR` / `OFICINA:ELIMINAR`) |
+| GET / POST | `/api/vehiculos` | Listar activos / crear (`VEHICULO:VER` / `VEHICULO:CREAR`) |
+| PUT / DELETE | `/api/vehiculos/{id}` | Editar / dar de baja |
+| GET | `/api/vehiculos/disponibles?desde=&hasta=&oficinaOrigenId=&oficinaDestinoId=` | Vehículos libres en ese rango y en esa oficina (`VEHICULO:VER` o `RESERVA:ALQUILAR`) |
+| GET / POST | `/api/modelos` | Listar / crear modelos (recurso `VEHICULO`) |
+| PUT / DELETE | `/api/modelos/{id}` | Editar / eliminar (solo si ningún vehículo lo usa) |
+| GET / POST | `/api/tipos` | Listar / crear tipos con su precio por día (recurso `VEHICULO`) |
+| PUT / DELETE | `/api/tipos/{id}` | Editar / eliminar (solo si ningún modelo lo usa) |
+| GET / POST | `/api/personas` | Listar activas (solo las que quien pide puede ver) / crear |
+| PUT / DELETE | `/api/personas/{id}` | Editar / dar de baja |
+| GET / POST | `/api/roles` | Listar / crear roles con sus permisos (`ROL:VER` o `USUARIO:VER` / `ROL:CREAR`) |
+| PUT / DELETE | `/api/roles/{id}` | Editar / eliminar (solo si nadie lo tiene asignado) |
+| GET | `/api/permisos` | Catálogo de recursos y acciones para la matriz de roles (`ROL:VER`) |
+| GET | `/api/reservas` | Todas (`RESERVA:VER`) o `?clienteId=` (con `RESERVA:VER_PROPIAS`, solo el propio id) |
+| POST | `/api/reservas` | Crear: reserva de un vendedor (`RESERVA:CREAR` + `VENDER`) u online del cliente (`RESERVA:ALQUILAR`) |
+| POST | `/api/reservas/{id}/devolver` | Marcar como devuelta (`RESERVA:EDITAR`) |
+| POST | `/api/reservas/{id}/cancelar` | Cancelar una reserva que no empezó (`RESERVA:EDITAR`, o el cliente las suyas) |
+| GET | `/api/reportes?desde=&hasta=` | Reporte del período; sin fechas, el año en curso (`REPORTE:VER`) |
 
-Errores: siempre `{"error": "mensaje"}` con 400 (datos inválidos), 401 (login),
-404 (no existe), 409 (repetido o no disponible).
+En `/api/personas` se exige `CLIENTE:<acción>` o `USUARIO:<acción>` según el rol
+de la persona que se toca. Así un vendedor que administra clientes no puede dar de
+alta un admin. Si el alta no trae `rolId`, el servidor asigna el rol `CLIENTE`.
+
+Cuerpo de `POST /api/reservas`:
+
+```json
+{
+  "clienteId": 5,
+  "vendedorId": 3,
+  "oficinaOrigenId": 1,
+  "oficinaDestinoId": 2,
+  "fechaDesde": "2027-01-10",
+  "fechaHasta": "2027-01-12",
+  "detalles": [
+    {"vehiculoId": 1, "litrosNafta": 20},
+    {"vehiculoId": 2, "litrosNafta": 35}
+  ]
+}
+```
+
+`vendedorId` tiene que ser el id de quien hace el pedido, o `null` si reserva el
+propio cliente.
+
+Errores: siempre `{"error": "mensaje"}` con 400 (datos inválidos), 401 (sin sesión
+o token vencido), 403 (sin permiso), 404 (no existe) o 409 (repetido, no
+disponible o en uso).
 
 ## Tests
 
@@ -118,23 +251,61 @@ cd backend
 ./mvnw test
 ```
 
-- `PrecioPorDiaTest`: el cálculo del precio.
-- `ReservaServicioTest`: fechas, disponibilidad, permisos y devolución (con Mockito).
-- `AutenticacionServicioTest`: login con BCrypt real, contraseña incorrecta, baja.
-- `SixtApplicationTests`: que la aplicación arranque y cree las tablas.
+```bash
+cd frontend
+mvn test
+```
+
+| Test | Qué prueba |
+|---|---|
+| `PrecioPorDiaTest` | El cálculo del precio |
+| `ReservaServicioTest` | Fechas, disponibilidad, permisos, devolución y cancelación (con Mockito) |
+| `UbicacionDeFlotaTest` | En qué oficina está cada auto y cuándo se puede reservar |
+| `PeriodoTest` | Rangos de fechas de los reportes |
+| `AutenticacionServicioTest` | Login con BCrypt real, contraseña incorrecta, usuario dado de baja |
+| `PermisosTest` | La cascada de acciones y los permisos efectivos |
+| `ArquitecturaTest` | Que `seguridad` no dependa del resto de la aplicación (ArchUnit) |
+| `SixtApplicationTests`, `CargaDatosInicialesTest` | Que la aplicación arranque, cree las tablas y cargue los datos |
+| `ClientesApiTest`, `RolesApiTest`, `ReportesApiTest`, `ReservasPorOficinaApiTest`, `RecorridoDeUsuariosTest` | La API completa, con token, sobre H2 en memoria |
+| `DetalleReservaPersistenciaTest`, `MigracionDetalleReservaTest`, `MigracionPermisosTest` | Persistencia de los detalles y scripts de migración |
+| `PermisosDePantallaTest` (frontend) | Qué permiso pide cada pantalla |
+| `JspCompilacionTest` (frontend) | Que todos los JSP compilen |
+
+Los tests del backend usan H2 en memoria: no hace falta tener MySQL levantado.
 
 ## Cómo extender el sistema (principio abierto/cerrado)
 
-- **Rol nuevo** (ej. SYSADMIN): no se toca código. Se crea desde la pantalla
-  *Roles* (o `POST /api/roles`) eligiendo sus permisos. Las reglas del sistema
-  preguntan por permisos (`persona.puede(Permiso.VENDER)`), nunca por el nombre del rol.
-- **Permiso nuevo**: se agrega un valor al enum `Permiso` junto con la
-  funcionalidad que lo usa.
+- **Rol nuevo** (ej. AUDITOR): no se toca código. Se crea desde la pantalla
+  *Roles* (o `POST /api/roles`) eligiendo sus permisos. Las reglas preguntan por
+  permisos (`persona.puede(Recurso.RESERVA, Accion.VENDER)`), nunca por el nombre del rol.
+- **Recurso nuevo** (ej. mantenimientos): se agrega un valor al enum `Recurso`
+  con sus acciones, una línea `porRecurso(...)` en `ReglasDeAcceso`, las entradas
+  de sus pantallas en `PermisosDePantalla` y el link en `header.jspf`.
 - **Otra forma de cobrar** (descuentos, temporada...): se crea una clase que
   implemente `CalculadoraPrecio` y se marca con `@Primary`. `ReservaServicio`
   depende de la interfaz, así que no cambia.
-- **Venta de autos**: módulo nuevo (`Venta`, `VentaServicio`, `VentaControlador`)
-  que reutiliza `Vehiculo`, `Persona` y los servicios existentes sin modificarlos.
+- **Pantalla nueva con ABM**: un servlet que extienda `PantallaServlet` e
+  implemente `cargarDatos()`, `vista()` y `recurso()`, más su JSP.
+
+## Base de datos existente
+
+Una base nueva obtiene las tablas con Hibernate (`ddl-auto=update`). Al pasar de
+una versión anterior, `ddl-auto=update` no mueve datos ni quita restricciones, por
+eso hay scripts en `docs/` para ejecutar **con el backend detenido**, por ejemplo
+desde la pestaña SQL de phpMyAdmin:
+
+| Script | Cuándo |
+|---|---|
+| [docs/migracion-detalle-reserva.sql](docs/migracion-detalle-reserva.sql) | Base con reservas de un solo vehículo (antes de `DetalleReserva`). Conserva reservas y precios; se puede repetir |
+| [docs/migracion-vendedor-opcional.sql](docs/migracion-vendedor-opcional.sql) | Base donde `reserva.vendedor_id` todavía es `NOT NULL` (antes de las reservas online) |
+| [docs/migracion-permisos-varchar.sql](docs/migracion-permisos-varchar.sql) | Base con la columna `rol_permiso.permiso` como `ENUM` nativo de MySQL |
+
+Los permisos actuales se guardan en dos columnas (`recurso` y `accion`). Una base
+creada con el modelo de permisos anterior no se convierte sola: lo más simple es
+empezar con una base vacía (`docker compose down -v` borra el volumen de MySQL y
+**todos sus datos**) para que se vuelvan a cargar los roles y los datos de ejemplo.
+
+Después de migrar, reconstruir con `docker compose up -d --build`.
 
 ## Nombres
 
@@ -147,96 +318,8 @@ En Java los campos van en **camelCase** (`fechaCreacion`) y en la base quedan en
 
 ## Pendientes
 
-- Entrega al cliente y devolucion siguen representadas por el estado de devolucion; no hay entregas parciales.
-
-## Reservas con varios vehiculos
-
-`Reserva` contiene uno o mas `DetalleReserva` mediante `@OneToMany`.
-Cada detalle referencia un vehiculo, conserva patente/color/anio, litros iniciales
- y precio del alquiler completo para ese vehiculo. El total suma esos precios.
-Fechas, cliente, vendedor y oficinas son comunes. La devolucion es conjunta.
-Los detalles se crean y persisten dentro de la transaccion de la reserva;
-no tienen endpoints independientes que permitan dejar una reserva sin detalles.
-
-`POST /api/reservas` recibe ahora este formato (los campos individuales
-`vehiculoId` y `litrosNafta` se reemplazan por `detalles`):
-
-```json
-{
-  "clienteId": 3,
-  "vendedorId": 2,
-  "oficinaOrigenId": 1,
-  "oficinaDestinoId": 2,
-  "fechaDesde": "2027-01-10",
-  "fechaHasta": "2027-01-12",
-  "detalles": [
-    {"vehiculoId": 1, "litrosNafta": 20},
-    {"vehiculoId": 2, "litrosNafta": 35}
-  ]
-}
-```
-
-### Base de datos existente
-
-Una base nueva obtiene las tablas con Hibernate. Si ya existe la tabla `reserva`
-del modelo anterior, ejecutar **antes de iniciar el backend actualizado** el archivo
-[docs/migracion-detalle-reserva.sql](docs/migracion-detalle-reserva.sql) sobre `sixt`,
-por ejemplo desde la pestaña SQL de phpMyAdmin, con el backend detenido.
-El script conserva reservas y precios historicos, y deja las columnas anteriores
-como respaldo nullable. Puede repetirse sin duplicar los detalles migrados.
-`ddl-auto=update` por si solo no mueve los datos existentes.
-
-Luego reconstruir con `docker compose up -d --build`.
-
-## Direccion de clientes
-
-La direccion se guarda en `Persona` (modelo compartido por los tres roles),
-se carga y edita desde Personas y se muestra tambien en Mi cuenta al iniciar sesion.
-Los cuerpos de `POST /api/personas` y `PUT /api/personas/{id}` deben incluir
-`direccion`: texto obligatorio de hasta 500 caracteres. Se recortan espacios exteriores.
-Hibernate agrega la columna al iniciar con `ddl-auto=update`; no hace falta una
-migracion manual para este campo. Los registros anteriores quedan con direccion
-vacia hasta completarla desde la edicion; no se inventan domicilios para ellos.
-
-## Gestion de clientes y sesiones de la API
-
-El permiso `ADMINISTRAR_CLIENTES` habilita el menu Clientes para vendedores y
-administradores. Personas y Roles siguen requiriendo `ADMINISTRAR`.
-El flujo Clientes permite listar, crear, editar y dar de baja exclusivamente personas
-con rol `CLIENTE` y solo permiso `ALQUILAR`. No modifica vendedores, administradores
-ni roles personalizados. Los formularios y DTO de clientes no incluyen `rolId`:
-el servidor asigna el rol al crear y lo conserva al editar. La baja sigue bloqueada
-si el cliente tiene reservas sin devolver.
-
-- `GET /api/clientes`: clientes activos.
-- `POST /api/clientes`: DNI, nombre, direccion, email, telefono y contrasenia inicial.
-- `PUT /api/clientes/{id}`: DNI, nombre, direccion, email y telefono.
-- `DELETE /api/clientes/{id}`: baja logica.
-
-Las rutas de la API requieren una sesion autenticada, excepto `POST /api/login`.
-El login devuelve los datos del usuario y una cookie HTTP-only `SIXT_API_SESSION`.
-`GET /api/sesion` devuelve la identidad y permisos actuales; `POST /api/logout`
-invalida la sesion. Para probar con un cliente HTTP, conservar la cookie del login
-y enviarla en las consultas posteriores. No se aceptan identificadores de usuario
-como reemplazo de la autenticacion.
-
-El frontend conserva la cookie de la API en su propia sesion del servidor y la envia
-solo en solicitudes de ese usuario. Los permisos y el estado activo se verifican
-contra la base en cada solicitud. El cliente consulta solo sus reservas y cambia
-solo su propia contrasenia; el vendedor registrado en una reserva es el usuario
-que realiza la operacion. Las consultas de vehiculos/modelos/oficinas usadas por
-Reservas siguen disponibles para vendedores.
-
-Al iniciar se agrega el nuevo permiso a los roles iniciales `ADMIN` y `VENDEDOR`,
-tambien en una base existente, sin borrar personas ni reservas. Los roles
-personalizados se mantienen: si deben gestionar clientes, asignarles ese permiso
-al crearlos. Los permisos se almacenan como texto `VARCHAR(64)`, manteniendo
-`EnumType.STRING` en Java. Para una base anterior que todavia tenga un `ENUM`
-nativo de MySQL, ejecutar una vez [docs/migracion-permisos-varchar.sql](docs/migracion-permisos-varchar.sql)
-con el backend detenido, antes de actualizar. `ddl-auto=update` no garantiza
-ampliar los valores de un ENUM existente.
-Reconstruir con `docker compose up -d --build` y volver a iniciar sesion.
-No hace falta reiniciar ni eliminar el volumen de MySQL.
+- La entrega al cliente y la devolución siguen representadas solo por el estado
+  de devolución; no hay entregas parciales.
 
 ## Diagramas
 
